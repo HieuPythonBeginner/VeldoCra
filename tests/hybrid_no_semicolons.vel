@@ -1,0 +1,6 @@
+# Test file with NO semicolons - HYBRID MODE
+manifest x = 10
+manifest y = 20
+print(x)
+print(y)
+

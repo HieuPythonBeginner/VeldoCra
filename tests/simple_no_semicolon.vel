@@ -1,0 +1,6 @@
+# Simple test WITHOUT semicolons
+manifest x = 42
+manifest y = 100
+manifest z = x + y
+print(z)
+

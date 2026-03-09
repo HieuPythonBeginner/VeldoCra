@@ -1,0 +1,61 @@
+// Phase 7 Test File
+// Test ego/core member access
+
+// Test OOP with ego
+ego.name = "Test"
+ego.age = 25
+
+// Test OOP with core
+core.value = 10
+core.getValue()
+
+// Test Memory keywords with parentheses
+forge(100)
+pur(50)
+clm(25)
+rsz(ptr, 200)
+
+// Test Memory keywords without parentheses
+ee ptr
+ee_inf_layers obj
+vec myVec
+echo myRef
+touch myVar
+
+// Test Hybrid Flow - brace style
+verdict x > 0 {
+    print("positive")
+} fail {
+    print("negative")
+}
+
+// Test Hybrid Flow - colon style with ;
+verdict x > 0:
+    print("positive")
+fail:
+    print("negative")
+;
+
+// Test Hybrid Flow - cycle with colon
+cycle i in range(5):
+    print(i)
+;
+
+// Test OOP Hybrid - race with braces
+race Person {
+    ego.name = "John"
+    ego.age = 30
+}
+
+// Test OOP Hybrid - race with colon
+race Person:
+    ego.name = "Jane"
+    ego.age = 25
+;
+
+// Test origin keyword
+origin
+flow x, y
+sink 10
+rise
+

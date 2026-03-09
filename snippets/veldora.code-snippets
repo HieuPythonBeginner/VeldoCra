@@ -1,0 +1,348 @@
+{
+  "Genesis Keywords": {
+    "prefix": "av",
+    "body": "av ${1:name}",
+    "description": "Declare variable (genesis)"
+  },
+  "limit": {
+    "prefix": "limit",
+    "body": "limit ${1:name}: ${2:value}",
+    "description": "Declare constant"
+  },
+  "senect": {
+    "prefix": "senect",
+    "body": "senect ${1:name}",
+    "description": "Delete/destroy variable"
+  },
+  "immo": {
+    "prefix": "immo",
+    "body": "immo ${1:name}",
+    "description": "Immutable declaration"
+  },
+  "omni": {
+    "prefix": "omni",
+    "body": "omni ${1:type}",
+    "description": "Universal type"
+  },
+  "evolve": {
+    "prefix": "evolve",
+    "body": "evolve ${1:expression}",
+    "description": "Type conversion"
+  },
+  "species": {
+    "prefix": "species",
+    "body": "species ${1:name}",
+    "description": "Define type/structure"
+  },
+  "print": {
+    "prefix": "print",
+    "body": "print(${1:message})",
+    "description": "Print to output"
+  },
+  "Control Keywords": {
+    "prefix": "verdict",
+    "body": "verdict ${1:condition}:\n    ${2:block}\nfail:\n    ${3:else_block}",
+    "description": "If statement"
+  },
+  "fail": {
+    "prefix": "fail",
+    "body": "fail:\n    ${1:block}",
+    "description": "Else/Default block"
+  },
+  "path": {
+    "prefix": "path",
+    "body": "path ${1:condition}:\n    ${2:block}",
+    "description": "Switch case"
+  },
+  "analysis": {
+    "prefix": "analysis",
+    "body": "analysis ${1:expression}",
+    "description": "Evaluate expression"
+  },
+  "cycle": {
+    "prefix": "cycle",
+    "body": "cycle ${1:condition}:\n    ${2:block}",
+    "description": "While loop"
+  },
+  "sustain": {
+    "prefix": "sustain",
+    "body": "sustain ${1:iterable}:\n    ${2:block}",
+    "description": "For loop"
+  },
+  "samsara": {
+    "prefix": "samsara",
+    "body": "samsara:\n    ${1:block}",
+    "description": "Infinite loop"
+  },
+  "end": {
+    "prefix": "end",
+    "body": "end",
+    "description": "End block/loop"
+  },
+  "skip": {
+    "prefix": "skip",
+    "body": "skip",
+    "description": "Continue to next iteration"
+  },
+  "Function Keywords": {
+    "prefix": "ability",
+    "body": "proclaim ability ${1:name}(${2:params}) -> ${3:return_type}:\n    ${4:body}",
+    "description": "Declare function"
+  },
+  "feat": {
+    "prefix": "feat",
+    "body": "feat ${1:name}(${2:params})",
+    "description": "Return statement"
+  },
+  "hax": {
+    "prefix": "hax",
+    "body": "hax ${1:condition}:\n    ${2:true_value}\nfail:\n    ${3:false_value}",
+    "description": "Ternary/conditional"
+  },
+  "scale": {
+    "prefix": "scale",
+    "body": "scale ${1:expression}",
+    "description": "Return expression"
+  },
+  "stasis": {
+    "prefix": "stasis",
+    "body": "stasis ${1:expression}",
+    "description": "Await/suspend"
+  },
+  "non_linear": {
+    "prefix": "non_linear",
+    "body": "non_linear ${1:async_call}",
+    "description": "Async execution"
+  },
+  "wait": {
+    "prefix": "wait",
+    "body": "wait ${1:milliseconds}",
+    "description": "Delay execution"
+  },
+  "OOP Keywords": {
+    "prefix": "race",
+    "body": "race ${1:class_name}:\n    ${2:members}",
+    "description": "Class definition"
+  },
+  "avatar": {
+    "prefix": "avatar",
+    "body": "avatar ${1:class_name}",
+    "description": "Create object instance"
+  },
+  "grant": {
+    "prefix": "grant",
+    "body": "grant ${1:permission}",
+    "description": "Permission grant"
+  },
+  "blessing": {
+    "prefix": "blessing",
+    "body": "blessing ${1:name}(${2:params})",
+    "description": "Constructor"
+  },
+  "contract": {
+    "prefix": "contract",
+    "body": "contract ${1:interface_name}:\n    ${2:methods}",
+    "description": "Interface definition"
+  },
+  "glory": {
+    "prefix": "glory",
+    "body": "glory ${1:method_name}",
+    "description": "Public method"
+  },
+  "void": {
+    "prefix": "void",
+    "body": "void ${1:field_name}",
+    "description": "Private field"
+  },
+  "core": {
+    "prefix": "core",
+    "body": "core ${1:method_name}",
+    "description": "Static method"
+  },
+  "ego": {
+    "prefix": "ego",
+    "body": "ego ${1:property}",
+    "description": "Self reference"
+  },
+  "Memory Keywords": {
+    "prefix": "vec",
+    "body": "vec ${1:name} = [${2:elements}]",
+    "description": "Create vector/array"
+  },
+  "echo": {
+    "prefix": "echo",
+    "body": "echo ${1:index}",
+    "description": "Array access"
+  },
+  "touch": {
+    "prefix": "touch",
+    "body": "touch ${1:index}",
+    "description": "Array index"
+  },
+  "forge": {
+    "prefix": "forge",
+    "body": "forge ${1:type}",
+    "description": "Memory allocation"
+  },
+  "pur": {
+    "prefix": "pur",
+    "body": "pur ${1:pointer}",
+    "description": "Free memory"
+  },
+  "clm": {
+    "prefix": "clm",
+    "body": "clm ${1:size}",
+    "description": "Claim memory"
+  },
+  "rsz": {
+    "prefix": "rsz",
+    "body": "rsz ${1:pointer}, ${2:new_size}",
+    "description": "Resize memory"
+  },
+  "ee": {
+    "prefix": "ee",
+    "body": "ee ${1:expression}",
+    "description": "Evaluate expression"
+  },
+  "manifest": {
+    "prefix": "manifest",
+    "body": "manifest ${1:value}",
+    "description": "Create instance"
+  },
+  "ee_inf_layers": {
+    "prefix": "ee_inf_layers",
+    "body": "ee_inf_layers ${1:depth}",
+    "description": "Deep evaluation"
+  },
+  "forbidden": {
+    "prefix": "forbidden",
+    "body": "forbidden ${1:operation}",
+    "description": "Restricted operation"
+  },
+  "anomaly": {
+    "prefix": "anomaly",
+    "body": "anomaly ${1:condition}",
+    "description": "Exception handling"
+  },
+  "cap": {
+    "prefix": "cap",
+    "body": "cap ${1:value}",
+    "description": "Capacity limit"
+  },
+  "System Keywords": {
+    "prefix": "origin",
+    "body": "origin ${1:state_name}:\n    ${2:states}",
+    "description": "State machine origin"
+  },
+  "flow": {
+    "prefix": "flow",
+    "body": "flow ${1:next_state}",
+    "description": "State transition"
+  },
+  "sink": {
+    "prefix": "sink",
+    "body": "sink ${1:target}",
+    "description": "Jump to target"
+  },
+  "rise": {
+    "prefix": "rise",
+    "body": "rise ${1:event}",
+    "description": "Raise event"
+  },
+  "summon": {
+    "prefix": "summon",
+    "body": "summon ${1:function_name}",
+    "description": "Call function"
+  },
+  "resoul": {
+    "prefix": "resoul",
+    "body": "resoul ${1:object}",
+    "description": "Recreate object"
+  },
+  "leap": {
+    "prefix": "leap",
+    "body": "leap ${1:target}",
+    "description": "Goto target"
+  },
+  "halt": {
+    "prefix": "halt",
+    "body": "halt",
+    "description": "Stop execution"
+  },
+  "petition": {
+    "prefix": "petition",
+    "body": "petition ${1:request}",
+    "description": "System request"
+  },
+  "inhale": {
+    "prefix": "inhale",
+    "body": "inhale ${1:input}",
+    "description": "Read input"
+  },
+  "exhale": {
+    "prefix": "exhale",
+    "body": "exhale ${1:output}",
+    "description": "Write output"
+  },
+  "Error Keywords": {
+    "prefix": "clash",
+    "body": "clash ${1:error_type}",
+    "description": "Throw error"
+  },
+  "counter": {
+    "prefix": "counter",
+    "body": "counter ${1:error}",
+    "description": "Catch error"
+  },
+  "lowdiff": {
+    "prefix": "lowdiff",
+    "body": "lowdiff ${1:condition}",
+    "description": "Low difficulty error"
+  },
+  "debuff": {
+    "prefix": "debuff",
+    "body": "debuff ${1:effect}",
+    "description": "Apply debuff"
+  },
+  "dispel": {
+    "prefix": "dispel",
+    "body": "dispel ${1:effect}",
+    "description": "Remove effect"
+  },
+  "end_of_canon": {
+    "prefix": "end_of_canon",
+    "body": "end_of_canon",
+    "description": "End of code marker"
+  },
+  "Module Keywords": {
+    "prefix": "absorb",
+    "body": "absorb ${1:module_name}",
+    "description": "Import module"
+  },
+  "federation": {
+    "prefix": "federation",
+    "body": "federation ${1:module_name}:\n    ${2:definitions}",
+    "description": "Module definition"
+  },
+  "legion": {
+    "prefix": "legion",
+    "body": "legion ${1:group_name}",
+    "description": "Group namespace"
+  },
+  "proclaim": {
+    "prefix": "proclaim",
+    "body": "proclaim ${1:definition}",
+    "description": "Export definition"
+  },
+  "alias": {
+    "prefix": "alias",
+    "body": "alias ${1:name} = ${2:value}",
+    "description": "Create alias"
+  },
+  "domain": {
+    "prefix": "domain",
+    "body": "domain ${1:domain_name}",
+    "description": "Define domain"
+  }
+}
+

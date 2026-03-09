@@ -1,0 +1,85 @@
+# Absorb Low-Level - Phase 7 Example
+# Demonstrates: absorb (include), forbidden (unsafe), anomaly (volatile), cap (sizeof)
+
+# Using absorb (include) to include system headers
+absorb stdio
+absorb stdlib
+
+# Using forbidden (unsafe) block for low-level operations
+forbidden {
+    # Using vec (ptr) for pointer manipulation
+    data_ptr := vec(i32, 100)
+    
+    # Using touch (deref) to dereference
+    touch(data_ptr) := 42
+    
+    # Using echo (ref) to get reference
+    ref_val := echo(data_ptr)
+    
+    print("Unsafe pointer operations completed")
+    print(ref_val)
+}
+
+# Using cap (sizeof) to get size of types
+int_size := cap(i32)
+pointer_size := cap(i32*)
+string_size := cap(string)
+
+print("Size of i32:")
+print(int_size)
+print("Size of pointer:")
+print(pointer_size)
+
+# Using anomaly (volatile) for volatile access
+anomaly flag := true
+
+# Using clash (try) and counter (catch) for error handling
+clash {
+    result := dangerous_operation()
+}
+counter e {
+    print("Error caught:")
+    print(e)
+}
+
+# Using lowdiff (panic) for critical errors
+verdict critical_failure == true
+    lowdiff("System critical failure!")
+
+# Using debuff (raise) to raise exceptions
+ability handle_error(code: number)
+    verdict code < 0
+        debuff("Negative error code")
+    fail
+        print("Error handled normally")
+
+# Using dispel (drop) for cleanup
+resource := acquire_resource()
+dispel(resource)
+
+# Using end_of_canon (exit) to exit program
+ability shutdown()
+    print("Shutting down...")
+    end_of_canon(0)
+
+# Using cycle (for) instead of for loop
+limit sum := 0
+cycle i := 0 while i < 10
+    sum := sum + i
+
+print("Sum from 0 to 9:")
+print(sum)
+
+# Using samsara (loop) for infinite loops (with break using end)
+ability demo_loop()
+    limit counter := 0
+    samsara
+        counter := counter + 1
+        verdict counter >= 5
+            end  # break out of loop
+        print(counter)
+
+summon(demo_loop)
+
+print("Low-level operations demonstration complete!")
+

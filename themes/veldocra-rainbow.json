@@ -1,0 +1,113 @@
+{
+  "name": "VeldoCra Rainbow Theme",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#0d1117",
+    "editor.foreground": "#c9d1d9",
+    "editor.lineHighlightBackground": "#161b22",
+    "editor.selectionBackground": "#264f78",
+    "editorCursor.foreground": "#58a6ff",
+    "editorLineNumber.foreground": "#6e7681"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment",
+      "settings": {
+        "foreground": "#8b949e",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "string",
+      "settings": {
+        "foreground": "#a5d6ff"
+      }
+    },
+    {
+      "scope": "keyword.declaration.veldocra.rainbow",
+      "settings": {
+        "foreground": "#7ee787",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.control.veldocra.rainbow",
+      "settings": {
+        "foreground": "#ffa657",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.function.veldocra.rainbow",
+      "settings": {
+        "foreground": "#d2a8ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.oop.veldocra.rainbow",
+      "settings": {
+        "foreground": "#ffd33d",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.memory.veldocra.rainbow",
+      "settings": {
+        "foreground": "#ff7b72",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.system.veldocra.rainbow",
+      "settings": {
+        "foreground": "#79c0ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.error.veldocra.rainbow",
+      "settings": {
+        "foreground": "#f85149",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.module.veldocra.rainbow",
+      "settings": {
+        "foreground": "#3fb950",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "constant.numeric",
+      "settings": {
+        "foreground": "#79c0ff"
+      }
+    },
+    {
+      "scope": "constant.numeric.hex",
+      "settings": {
+        "foreground": "#ff7b72"
+      }
+    },
+    {
+      "scope": "entity.name.function",
+      "settings": {
+        "foreground": "#d2a8ff"
+      }
+    },
+    {
+      "scope": "storage.type",
+      "settings": {
+        "foreground": "#ffa657"
+      }
+    },
+    {
+      "scope": "keyword.operator",
+      "settings": {
+        "foreground": "#ff7b72"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=VeldoCra
+GenericName=VeldoCra Compiler
+Comment=VeldoCra Programming Language Compiler
+Exec=/usr/local/bin/velc %f
+Icon=veldora
+Terminal=true
+Categories=Development;Interpreter;ProgrammingLanguage;
+MimeType=text/x-vel;
+Keywords=vel;compiler;programming;script;
+StartupNotify=true

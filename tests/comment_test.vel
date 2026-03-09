@@ -1,0 +1,20 @@
+# Test VeldoCra comment keywords
+cmt This is a single-line comment using cmt keyword
+
+cmt This is also a comment
+
+print("Testing cmt keyword!")
+
+mul_cmt {
+    This is a multi-line comment
+    using mul_cmt keyword with braces
+    It can span multiple lines
+}
+
+print("Testing mul_cmt keyword!")
+
+// Regular C-style comment still works
+/* Regular multi-line comment */
+
+print("All comment types work!")
+

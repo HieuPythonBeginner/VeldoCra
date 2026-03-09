@@ -1,0 +1,43 @@
+# Test file WITHOUT semicolons - Phase 11.1 Hybrid Awakening
+# This should parse successfully with velc
+
+manifest x = 42
+manifest y = 100
+manifest z = x + y
+
+print("Test 1: No semicolons")
+print(x)
+print(y)
+print(z)
+
+manifest a = 10
+manifest b = 20
+manifest c = a * b
+
+print("Test 2: More operations")
+print(c)
+
+# Mixed expressions without semicolons
+manifest result = (x + y) * 2
+print("Test 3: Complex expression")
+print(result)
+
+# Function definition without semicolon
+def greet(name)
+    print("Hello, ")
+    print(name)
+
+# Function call without semicolon  
+greet("VeldoCra")
+
+# Multiple statements in sequence without semicolons
+manifest val1 = 1
+manifest val2 = 2
+manifest val3 = 3
+print("Test 4: Multiple manifests")
+print(val1)
+print(val2)
+print(val3)
+
+print("SUCCESS: All tests passed without semicolons!")
+

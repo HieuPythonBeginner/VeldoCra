@@ -1,0 +1,26 @@
+# Build directories
+build/
+
+# C++ object files
+*.o
+*.obj
+
+# C++ dependency files
+*.d
+
+# Compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,244 @@
+<parameter name="content">/**
+ * @file ownership.cpp
+ * @brief VeldoCra Ownership System Implementation
+ * @author Dr. Bright
+ * 
+ * ZERO-COST ABSTRACTION: All ownership checking happens at COMPILE TIME.
+ * The final binary has ZERO runtime overhead.
+ */
+
+#include "ownership/ownership.h"
+#include <iostream>
+#include <algorithm>
+
+namespace veldocra {
+namespace ownership {
+
+// ============================================================================
+// OwnershipContext Implementation
+// ============================================================================
+
+OwnershipContext::OwnershipContext() 
+    : scope_depth_(0), current_point_(0) {
+}
+
+OwnershipContext::~OwnershipContext() = default;
+
+OwnershipContext::OwnershipContext(OwnershipContext&& other) noexcept
+    : scope_depth_(other.scope_depth_),
+      current_point_(other.current_point_),
+      variables_(std::move(other.variables_)),
+      scope_variables_(std::move(other.scope_variables_)) {
+}
+
+OwnershipContext& OwnershipContext::operator=(OwnershipContext&& other) noexcept {
+    if (this != &other) {
+        scope_depth_ = other.scope_depth_;
+        current_point_ = other.current_point_;
+        variables_ = std::move(other.variables_);
+        scope_variables_ = std::move(other.scope_variables_);
+    }
+    return *this;
+}
+
+void OwnershipContext::declare_variable(std::string name, OwnershipInfo info) {
+    variables_[std::move(name)] = std::move(info);
+}
+
+void OwnershipContext::move_variable(std::string name) {
+    auto it = variables_.find(name);
+    if (it != variables_.end()) {
+        it->second.set_kind(OwnershipKind::Moved);
+    }
+}
+
+void OwnershipContext::borrow_variable(std::string borrower, std::string lender, bool mutable_borrow) {
+    // Mark the lender as borrowed
+    auto it = variables_.find(lender);
+    if (it != variables_.end()) {
+        if (mutable_borrow) {
+            it->second.set_kind(OwnershipKind::BorrowedMutable);
+        } else {
+            it->second.set_kind(OwnershipKind::Borrowed);
+        }
+    }
+}
+
+void OwnershipContext::end_borrow(std::string borrower) {
+    // Restore the borrower's ownership state to Owned
+    auto it = variables_.find(borrower);
+    if (it != variables_.end()) {
+        // Find the original lender and restore its ownership
+        // This is a simplified implementation
+        it->second.set_kind(OwnershipKind::Owned);
+    }
+}
+
+OwnershipInfo* OwnershipContext::lookup(std::string_view name) {
+    auto it = variables_.find(std::string(name));
+    if (it != variables_.end()) {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+const OwnershipInfo* OwnershipContext::lookup(std::string_view name) const {
+    auto it = variables_.find(std::string(name));
+    if (it != variables_.end()) {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+bool OwnershipContext::contains(std::string_view name) const {
+    return variables_.find(std::string(name)) != variables_.end();
+}
+
+void OwnershipContext::enter_scope() {
+    ++scope_depth_;
+    scope_variables_.push({});
+}
+
+void OwnershipContext::exit_scope() {
+    if (!scope_variables_.empty()) {
+        auto& vars = scope_variables_.top();
+        for (const auto& var : vars) {
+            variables_.erase(var);
+        }
+        scope_variables_.pop();
+    }
+    --scope_depth_;
+}
+
+// ============================================================================
+// OwnershipError Implementation
+// ============================================================================
+
+std::string OwnershipError::to_string() const {
+    std::string result = "Ownership Error: ";
+    result += error_kind_to_string(kind);
+    result += " - ";
+    result += message;
+    if (!variable_name.empty()) {
+        result += " (variable: '";
+        result += variable_name;
+        result += "')";
+    }
+    return result;
+}
+
+// ============================================================================
+// OwnershipChecker Implementation
+// ============================================================================
+
+OwnershipChecker::OwnershipChecker() : verbose_(false) {
+}
+
+OwnershipChecker::~OwnershipChecker() = default;
+
+void OwnershipChecker::check(void* ast_root) {
+    if (!ast_root) return;
+    
+    // Enter global scope
+    context_.enter_scope();
+    
+    // Walk the AST - this is a simplified implementation
+    // In a full implementation, we would walk the actual AST nodes
+    walk_node(ast_root);
+    
+    // Exit global scope
+    context_.exit_scope();
+}
+
+void OwnershipChecker::report_error(OwnershipErrorKind kind, std::string_view var_name,
+                                   std::string_view message, uint32_t line, uint32_t column) {
+    OwnershipError error;
+    error.kind = kind;
+    error.message = std::string(message);
+    error.variable_name = std::string(var_name);
+    error.point = context_.get_current_point();
+    error.line = line;
+    error.column = column;
+    errors_.push_back(error);
+    
+    if (verbose_) {
+        std::cerr << "Ownership Error: " << error.to_string() << "\n";
+    }
+}
+
+// AST walking implementations - compile-time only
+// These are stubs that can be expanded with full AST walking
+
+void OwnershipChecker::walk_node(void* node) {
+    if (!node) return;
+    context_.advance_point();
+    // In a full implementation, we would cast node to AST node type
+    // and dispatch based on node kind
+}
+
+void OwnershipChecker::walk_statement(void* stmt) {
+    if (!stmt) return;
+    walk_node(stmt);
+}
+
+void OwnershipChecker::walk_expression(void* expr) {
+    if (!expr) return;
+    walk_node(expr);
+}
+
+// Statement handlers
+
+void OwnershipChecker::handle_let(void* stmt) {
+    // Handle variable declaration
+    // let x = value;
+}
+
+void OwnershipChecker::handle_block(void* stmt) {
+    context_.enter_scope();
+    // Walk block statements
+    context_.exit_scope();
+}
+
+void OwnershipChecker::handle_if(void* stmt) {
+    // Handle if statement
+}
+
+void OwnershipChecker::handle_while(void* stmt) {
+    // Handle while statement
+}
+
+void OwnershipChecker::handle_for(void* stmt) {
+    // Handle for statement
+}
+
+void OwnershipChecker::handle_fn(void* stmt) {
+    context_.enter_scope();
+    // Walk function body
+    context_.exit_scope();
+}
+
+void OwnershipChecker::handle_return(void* stmt) {
+    // Handle return statement
+}
+
+// Expression handlers
+
+void OwnershipChecker::handle_variable(void* expr) {
+    // Handle variable reference
+}
+
+void OwnershipChecker::handle_binary(void* expr) {
+    // Handle binary expression
+}
+
+void OwnershipChecker::handle_call(void* expr) {
+    // Handle function call
+}
+
+void OwnershipChecker::handle_assignment(void* expr) {
+    // Handle assignment - may trigger move
+}
+
+} // namespace ownership
+} // namespace veldocra
+</parameter>

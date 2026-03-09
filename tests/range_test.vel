@@ -1,0 +1,12 @@
+// Test file for Ada Layer Range Constraint Guard
+// This should trigger a range violation error at compile time
+
+// This variable has a range constraint: 0..1000 (hardcoded for "mana")
+manifest mana = 500;
+
+// This should succeed: within range
+manifest valid_mana = 750;
+
+// This should FAIL: out of range (mana range is 0..1000)
+manifest invalid_mana = 2000;
+

@@ -1,0 +1,219 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "VeldoCra",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#keywords_genesis"
+    },
+    {
+      "include": "#keywords_control"
+    },
+    {
+      "include": "#keywords_functions"
+    },
+    {
+      "include": "#keywords_oop"
+    },
+    {
+      "include": "#keywords_memory"
+    },
+    {
+      "include": "#keywords_system"
+    },
+    {
+      "include": "#keywords_error"
+    },
+    {
+      "include": "#keywords_module"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#types"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.veldocra",
+          "begin": "#",
+          "end": "$"
+        },
+        {
+          "name": "comment.line.double-slash.veldocra",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.line.cmt.veldocra",
+          "begin": "\\bcmt\\b",
+          "end": "$"
+        },
+        {
+          "name": "comment.block.veldocra",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.block.mul_cmt.veldocra",
+          "begin": "\\bmul_cmt\\s*\\{",
+          "end": "\\}"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.veldocra",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.veldocra",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.veldocra",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.veldocra",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.triple.veldocra",
+          "begin": "\"\"\"",
+          "end": "\"\"\""
+        }
+      ]
+    },
+    "keywords_genesis": {
+      "patterns": [
+        {
+          "name": "keyword.control.veldocra.genesis",
+          "match": "\\b(av|limit|senect|immo|omni|evolve|species|print)\\b"
+        }
+      ]
+    },
+    "keywords_control": {
+      "patterns": [
+        {
+          "name": "keyword.control.veldocra.flow",
+          "match": "\\b(verdict|fail|path|analysis|cycle|sustain|samsara|end|skip)\\b"
+        }
+      ]
+    },
+    "keywords_functions": {
+      "patterns": [
+        {
+          "name": "keyword.other.veldocra.function",
+          "match": "\\b(ability|feat|hax|scale|stasis|non_linear|wait)\\b"
+        }
+      ]
+    },
+    "keywords_oop": {
+      "patterns": [
+        {
+          "name": "keyword.other.veldocra.oop",
+          "match": "\\b(race|avatar|grant|blessing|contract|glory|void|core|ego)\\b"
+        }
+      ]
+    },
+    "keywords_memory": {
+      "patterns": [
+        {
+          "name": "keyword.other.veldocra.memory",
+          "match": "\\b(vec|echo|touch|forge|pur|clm|rsz|ee|manifest|ee_inf_layers|forbidden|anomaly|cap)\\b"
+        }
+      ]
+    },
+    "keywords_system": {
+      "patterns": [
+        {
+          "name": "keyword.other.veldocra.system",
+          "match": "\\b(origin|flow|sink|rise|summon|resoul|leap|halt|petition|inhale|exhale)\\b"
+        }
+      ]
+    },
+    "keywords_error": {
+      "patterns": [
+        {
+          "name": "keyword.other.veldocra.error",
+          "match": "\\b(clash|counter|lowdiff|debuff|dispel|end_of_canon)\\b"
+        }
+      ]
+    },
+    "keywords_module": {
+      "patterns": [
+        {
+          "name": "keyword.other.veldocra.module",
+          "match": "\\b(absorb|federation|legion|proclaim|alias|domain)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.veldocra",
+          "match": "(:=|->|==|!=|>=|<=|=>|<-|->|\\+|-|\\*|/|%|>|<|!|&|\\||&&|\\|\\|)"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.veldocra",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        },
+        {
+          "name": "constant.numeric.hex.veldocra",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.veldocra",
+          "match": "\\b0[bB][01]+\\b"
+        },
+        {
+          "name": "constant.numeric.octal.veldocra",
+          "match": "\\b0[oO][0-7]+\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.veldocra",
+          "match": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.veldocra",
+          "match": "\\b(string|number|bool|array|dict|void|int|float|char|bool)\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.veldocra"
+}

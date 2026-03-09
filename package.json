@@ -1,0 +1,83 @@
+{
+  "name": "veldora-language-support",
+  "displayName": "VeldoCra Language Support",
+  "description": "Complete language support for VeldoCra programming language - syntax highlighting, file icons, and language features",
+  "version": "1.0.0",
+  "publisher": "VeldoCra",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Themes"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "veldora",
+        "aliases": [
+          "VeldoCra",
+          "vel"
+        ],
+        "extensions": [
+          ".vel"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "veldora",
+        "scopeName": "source.veldocra",
+        "path": "./syntaxes/veldora.tmLanguage.json"
+      },
+      {
+        "language": "veldora-rainbow",
+        "scopeName": "source.veldocra.rainbow",
+        "path": "./syntaxes/veldora-rainbow.tmLanguage.json"
+      },
+      {
+        "language": "veldora-neon",
+        "scopeName": "source.veldocra.neon",
+        "path": "./syntaxes/veldora-neon.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "VeldoCra Rainbow",
+        "uiTheme": "vs-dark",
+        "path": "./themes/veldocra-rainbow.json"
+      },
+      {
+        "label": "VeldoCra Neon Blue",
+        "uiTheme": "vs-dark",
+        "path": "./themes/veldocra-neon.json"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "veldora-dragon-icons",
+        "label": "Veldora Dragon Icons",
+        "path": "./icons/veldora-icons.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "veldora",
+        "path": "./snippets/veldora.code-snippets"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veldora/veldora-language-support"
+  },
+  "keywords": [
+    "veldora",
+    "veldocra",
+    "language",
+    "syntax-highlighting",
+    "icon-theme",
+    "programming-language"
+  ]
+}

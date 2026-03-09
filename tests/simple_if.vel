@@ -1,0 +1,6 @@
+verdict x > 0 {
+    print("positive")
+} fail {
+    print("negative")
+}
+

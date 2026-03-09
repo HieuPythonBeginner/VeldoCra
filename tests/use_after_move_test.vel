@@ -1,0 +1,15 @@
+// Test file for C++ Layer: Use-After-Move Detection
+// This should trigger a use-after-move error at compile time
+
+// Declare a soul type (owned)
+manifest soul = create_soul("Test");
+
+// Move the soul (ownership transferred)
+manifest moved_soul = soul;
+
+// This should FAIL: use-after-move (trying to use 'soul' after it was moved)
+print(soul);
+
+
+manifest x = 42;
+

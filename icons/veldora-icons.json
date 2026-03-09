@@ -1,0 +1,37 @@
+{
+  "iconThemeId": "veldora-dragon-icons",
+  "iconDefinitions": {
+    "_vel_file": {
+      "iconPath": "./VeldAni.png"
+    }
+  },
+  "languageIds": {
+    "vel": "vel"
+  },
+  "file": [
+    {
+      "file": "\\.vel$",
+      "icon": "_vel_file"
+    }
+  ],
+  "folder": [],
+  "folderNames": {},
+  "fileNames": {},
+  "rootFolder": {
+    "name": "Veldora",
+    "icon": "_vel_file"
+  },
+  "hidesExplorerArrows": false,
+  "light": {
+    "file": [],
+    "folder": []
+  },
+  "highContrast": {
+    "file": [],
+    "folder": []
+  },
+  "version": "1.0.0",
+  "author": "Dr. Bright",
+  "description": "Custom icon theme for VeldoCra .vel files featuring the Veldora Dragon"
+}
+

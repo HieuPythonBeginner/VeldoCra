@@ -1,0 +1,198 @@
+{
+  "name": "VeldoCra Neon Blue",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#0a0e14",
+    "editor.foreground": "#c9d1d9",
+    "editor.lineHighlightBackground": "#161b22",
+    "editor.selectionBackground": "#264f78",
+    "editorCursor.foreground": "#00ffc8",
+    "editorLineNumber.foreground": "#3a4a5a"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment.line.number-sign.veldocra",
+      "settings": {
+        "foreground": "#6a5a7a",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "comment.line.double-slash.veldocra",
+      "settings": {
+        "foreground": "#6a5a7a",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "comment.line.cmt.veldocra",
+      "settings": {
+        "foreground": "#6a5a7a",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "comment.block.veldocra",
+      "settings": {
+        "foreground": "#6a5a7a",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "comment.block.mul_cmt.veldocra",
+      "settings": {
+        "foreground": "#6a5a7a",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "string",
+      "settings": {
+        "foreground": "#00d4ff"
+      }
+    },
+    {
+      "scope": "keyword.genesis.veldocra.neon",
+      "settings": {
+        "foreground": "#00e5cc",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.genesis.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00ffc8",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.control.veldocra.neon",
+      "settings": {
+        "foreground": "#00b8ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.control.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00d4ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.function.veldocra.neon",
+      "settings": {
+        "foreground": "#00ffcc",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.function.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00ffc8",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.oop.veldocra.neon",
+      "settings": {
+        "foreground": "#0099ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.oop.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00bfff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.memory.veldocra.neon",
+      "settings": {
+        "foreground": "#00c8e6",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.memory.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00ffff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.system.veldocra.neon",
+      "settings": {
+        "foreground": "#0088ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.system.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00aaff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.error.veldocra.neon",
+      "settings": {
+        "foreground": "#00d9e6",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.error.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#00ffc8",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.module.veldocra.neon",
+      "settings": {
+        "foreground": "#0077ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "keyword.module.veldocra.neon_bright",
+      "settings": {
+        "foreground": "#0099ff",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "constant.numeric",
+      "settings": {
+        "foreground": "#00bfff"
+      }
+    },
+    {
+      "scope": "constant.numeric.hex",
+      "settings": {
+        "foreground": "#ff3366"
+      }
+    },
+    {
+      "scope": "entity.name.function",
+      "settings": {
+        "foreground": "#00ffcc"
+      }
+    },
+    {
+      "scope": "storage.type",
+      "settings": {
+        "foreground": "#00c8ff"
+      }
+    },
+    {
+      "scope": "keyword.operator",
+      "settings": {
+        "foreground": "#00aaff"
+      }
+    }
+  ]
+}
+

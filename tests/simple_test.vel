@@ -1,0 +1,4 @@
+manifest x = 42;
+manifest y = 100;
+
+// my keywords doesn't has "let"!

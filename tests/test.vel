@@ -1,0 +1,3 @@
+# Test file for VeldoCra compiler
+print("Hello, VeldoCra!")
+
