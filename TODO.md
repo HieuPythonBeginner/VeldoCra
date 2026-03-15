@@ -1,34 +1,8 @@
-# Phase 6 - Basic Register VM Implementation TODO
+# VeldoCra Parser Fix TODO
 
-## Tasks:
-- [x] Create instruction.h with VM opcodes and instruction format
-- [x] Create vm.h with VM class declaration
-- [x] Implement vm.cpp with register-based VM using computed goto
-- [x] Update driver to integrate VM
-- [x] Test with test.vel
-
-## VM Requirements:
-- Register-based (not stack-based)
-- Fixed-size register file
-- Instruction pointer
-- Computed goto dispatch (NOT switch-case)
-- Support basic arithmetic and print
-
-## Implementation Complete!
-The Phase 6 Basic Register VM is now working. The VM:
-1. Uses computed goto for fast instruction dispatch
-2. Has 16 registers by default
-3. Supports integer and string operations
-4. Successfully runs the test program
-
-## Test Output:
-```
-$ ./build/bin/velc run tests/test.vel
-VeldoCra Compiler v0.0.1
-Processing tests/test.vel...
-Executing...
-Hello, VeldoCra!
-
-Success.
-```
-
+## Steps:
+- [x] 1. Edit src/frontend/parser/parser.cpp: Add explicit BraceClose consumption after parse_hybrid_block() in parse_function_definition()
+- [x] 2. Build the project
+- [x] 3. Test ./build/bin/velc check tests/fizzbuzz.vel (removed double advance in parse_function_definition(), rebuilding)
+- [x] 4. Test other .vel files for regression (parser fix successful, 0 parse errors)
+- [x] DONE

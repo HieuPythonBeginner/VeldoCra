@@ -1,0 +1,15 @@
+feat fib(n) {
+    verdict n <= 1 {
+        scale n;
+    } fail {
+        scale fib(n-1) + fib(n-2);
+    }
+}
+
+feat main() {
+    manifest i = 0;
+    sustain i < 20 {
+        flow "fib(", i, ") = ", fib(i), "\n";
+        evolve i = i + 1;
+    }
+}

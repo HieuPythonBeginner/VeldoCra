@@ -298,10 +298,7 @@ private:
      * @brief Initialize static keyword table
      */
     void initialize_static_keywords() {
-        // Declaration keywords
-        static_keywords_.emplace_back("let", TokenType::Kw_Let, KeywordCategory::Declaration);
-        static_keywords_.emplace_back("const", TokenType::Kw_Const, KeywordCategory::Declaration);
-        static_keywords_.emplace_back("mut", TokenType::Kw_Mut, KeywordCategory::Declaration);
+        // Declaration keywords - Phase 7 only
         static_keywords_.emplace_back("av", TokenType::Kw_Av, KeywordCategory::Declaration);
         static_keywords_.emplace_back("limit", TokenType::Kw_Limit, KeywordCategory::Declaration);
         static_keywords_.emplace_back("senect", TokenType::Kw_Senect, KeywordCategory::Declaration);
@@ -310,12 +307,7 @@ private:
         static_keywords_.emplace_back("evolve", TokenType::Kw_Evolve, KeywordCategory::Declaration);
         static_keywords_.emplace_back("species", TokenType::Kw_Species, KeywordCategory::Declaration);
         
-        // Flow Control keywords
-        static_keywords_.emplace_back("if", TokenType::Kw_If, KeywordCategory::FlowControl);
-        static_keywords_.emplace_back("else", TokenType::Kw_Else, KeywordCategory::FlowControl);
-        static_keywords_.emplace_back("elif", TokenType::Kw_Elif, KeywordCategory::FlowControl);
-        static_keywords_.emplace_back("for", TokenType::Kw_For, KeywordCategory::FlowControl);
-        static_keywords_.emplace_back("while", TokenType::Kw_While, KeywordCategory::FlowControl);
+        // Flow Control keywords - Phase 7 only
         static_keywords_.emplace_back("verdict", TokenType::Kw_Verdict, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("fail", TokenType::Kw_Fail, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("path", TokenType::Kw_Path, KeywordCategory::FlowControl);
@@ -326,21 +318,17 @@ private:
         static_keywords_.emplace_back("end", TokenType::Kw_End, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("skip", TokenType::Kw_Skip, KeywordCategory::FlowControl);
         
-        // Function keywords
-        static_keywords_.emplace_back("def", TokenType::Kw_Def, KeywordCategory::Function);
+        // Function keywords - Phase 7 only
         static_keywords_.emplace_back("fn", TokenType::Kw_Fn, KeywordCategory::Function);
         static_keywords_.emplace_back("ability", TokenType::Kw_Ability, KeywordCategory::Function);
         static_keywords_.emplace_back("feat", TokenType::Kw_Feat, KeywordCategory::Function);
         static_keywords_.emplace_back("hax", TokenType::Kw_Hax, KeywordCategory::Function);
-        static_keywords_.emplace_back("return", TokenType::Kw_Return, KeywordCategory::Function);
         static_keywords_.emplace_back("scale", TokenType::Kw_Scale, KeywordCategory::Function);
         static_keywords_.emplace_back("stasis", TokenType::Kw_Stasis, KeywordCategory::Function);
         static_keywords_.emplace_back("non_linear", TokenType::Kw_NonLinear, KeywordCategory::Function);
         static_keywords_.emplace_back("wait", TokenType::Kw_Wait, KeywordCategory::Function);
         
-        // OOP keywords
-        static_keywords_.emplace_back("class", TokenType::Kw_Class, KeywordCategory::OOP);
-        static_keywords_.emplace_back("struct", TokenType::Kw_Struct, KeywordCategory::OOP);
+        // OOP keywords - Phase 7 only
         static_keywords_.emplace_back("race", TokenType::Kw_Race, KeywordCategory::OOP);
         static_keywords_.emplace_back("avatar", TokenType::Kw_Avatar, KeywordCategory::OOP);
         static_keywords_.emplace_back("grant", TokenType::Kw_Grant, KeywordCategory::OOP);
@@ -351,7 +339,7 @@ private:
         static_keywords_.emplace_back("core", TokenType::Kw_Core, KeywordCategory::OOP);
         static_keywords_.emplace_back("ego", TokenType::Kw_Ego, KeywordCategory::OOP);
         
-        // Memory keywords
+        // Memory keywords - Phase 7 only
         static_keywords_.emplace_back("vec", TokenType::Kw_Vec, KeywordCategory::Memory);
         static_keywords_.emplace_back("echo", TokenType::Kw_Echo, KeywordCategory::Memory);
         static_keywords_.emplace_back("touch", TokenType::Kw_Touch, KeywordCategory::Memory);
@@ -366,7 +354,7 @@ private:
         static_keywords_.emplace_back("anomaly", TokenType::Kw_Anomaly, KeywordCategory::Memory);
         static_keywords_.emplace_back("cap", TokenType::Kw_Cap, KeywordCategory::Memory);
         
-        // System Commands - TRUE FORM (Universal Pattern)
+        // System Commands - Phase 7 only
         static_keywords_.emplace_back("origin", TokenType::Kw_Origin, KeywordCategory::SystemCommand);
         static_keywords_.emplace_back("flow", TokenType::Kw_Flow, KeywordCategory::SystemCommand);
         static_keywords_.emplace_back("sink", TokenType::Kw_Sink, KeywordCategory::SystemCommand);
@@ -379,7 +367,7 @@ private:
         static_keywords_.emplace_back("inhale", TokenType::Kw_Inhale, KeywordCategory::SystemCommand);
         static_keywords_.emplace_back("exhale", TokenType::Kw_Exhale, KeywordCategory::SystemCommand);
         
-        // Error Handling keywords
+        // Error Handling keywords - Phase 7 only
         static_keywords_.emplace_back("clash", TokenType::Kw_Clash, KeywordCategory::ErrorHandling);
         static_keywords_.emplace_back("counter", TokenType::Kw_Counter, KeywordCategory::ErrorHandling);
         static_keywords_.emplace_back("lowdiff", TokenType::Kw_Lowdiff, KeywordCategory::ErrorHandling);
@@ -387,7 +375,7 @@ private:
         static_keywords_.emplace_back("dispel", TokenType::Kw_Dispel, KeywordCategory::ErrorHandling);
         static_keywords_.emplace_back("end_of_canon", TokenType::Kw_EndOfCanon, KeywordCategory::ErrorHandling);
         
-        // Module keywords
+        // Module keywords - Phase 7 only
         static_keywords_.emplace_back("import", TokenType::Kw_Import, KeywordCategory::Module);
         static_keywords_.emplace_back("from", TokenType::Kw_From, KeywordCategory::Module);
         static_keywords_.emplace_back("as", TokenType::Kw_As, KeywordCategory::Module);
@@ -398,21 +386,21 @@ private:
         static_keywords_.emplace_back("alias", TokenType::Kw_Alias, KeywordCategory::Module);
         static_keywords_.emplace_back("domain", TokenType::Kw_Domain, KeywordCategory::Module);
         
-        // Literal keywords
+        // Literal keywords - kept
         static_keywords_.emplace_back("true", TokenType::Kw_True, KeywordCategory::Literal);
         static_keywords_.emplace_back("false", TokenType::Kw_False, KeywordCategory::Literal);
         static_keywords_.emplace_back("None", TokenType::Kw_None, KeywordCategory::Literal);
         
-        // Operator keywords
+        // Operator keywords - kept
         static_keywords_.emplace_back("and", TokenType::And, KeywordCategory::Operator);
         static_keywords_.emplace_back("or", TokenType::Or, KeywordCategory::Operator);
         static_keywords_.emplace_back("not", TokenType::Exclaim, KeywordCategory::Operator);
         
-        // Comment keywords
+        // Comment keywords - kept
         static_keywords_.emplace_back("cmt", TokenType::Comment, KeywordCategory::Comment);
         static_keywords_.emplace_back("mul_cmt", TokenType::Comment, KeywordCategory::Comment);
         
-        // Print (special) - treat as Function category
+        // Print (special) - kept
         static_keywords_.emplace_back("print", TokenType::Kw_Print, KeywordCategory::Function);
         
         // Wildcard

@@ -1,0 +1,16 @@
+feat fizzbuzz() {
+    manifest i = 1;
+    sustain i <= 101 {
+        verdict i % 15 == 0 {
+            flow "FizzBuzz";
+        } fail verdict i % 3 == 0 {
+            flow "Fizz";
+        } fail verdict i % 5 == 0 {
+            flow "Buzz";
+        } fail {
+            flow i;
+        }
+        flow "\n";
+        evolve i = i + 1;
+    }
+}

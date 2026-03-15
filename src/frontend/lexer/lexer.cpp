@@ -9,6 +9,7 @@
 #include <cstring>
 #include <algorithm>
 #include <iostream>
+#include <unordered_set>
 
 namespace veldocra {
 namespace lexer {
@@ -415,8 +416,41 @@ Token Lexer::scan_identifier() {
         return error_token;
     }
     
-    // Check for keywords
-    TokenType type = KeywordTable::instance().lookup(text);
+    // Check for keywords - BUT skip traditional keywords to allow them as variable names
+    // VeldoCra uses Phase 7 keywords (verdict, fail, race, etc.) instead of traditional ones
+    TokenType type = TokenType::Identifier; // Default to identifier
+    
+    // Only check for Phase 7 keywords (non-traditional)
+    static const std::unordered_set<std::string> phase7_keywords = {
+        // Declaration - Phase 7 only
+        "av", "limit", "senect", "immo", "omni", "evolve", "species",
+        // Flow Control - Phase 7 only  
+        "verdict", "fail", "path", "analysis", "cycle", "sustain", "samsara", "end", "skip",
+        // Function - Phase 7 only
+        "fn", "ability", "feat", "hax", "scale", "stasis", "non_linear", "wait",
+        // OOP - Phase 7 only
+        "race", "avatar", "grant", "blessing", "contract", "glory", "void", "core", "ego",
+        // Memory - Phase 7 only
+        "vec", "echo", "touch", "forge", "pur", "clm", "rsz", "ee", "manifest", 
+        "ee_inf_layers", "forbidden", "anomaly", "cap",
+        // System Commands - Phase 7 only
+        "origin", "flow", "sink", "rise", "summon", "resoul", "leap", "halt", 
+        "petition", "inhale", "exhale",
+        // Error Handling - Phase 7 only
+        "clash", "counter", "lowdiff", "debuff", "dispel", "end_of_canon",
+        // Module - Phase 7 only
+        "import", "from", "as", "absorb", "federation", "legion", "proclaim", "alias", "domain",
+        // Special - kept
+        "print", "true", "false", "None", "and", "or", "not",
+        "cmt", "mul_cmt"
+    };
+    
+    if (phase7_keywords.count(std::string(text))) {
+        type = KeywordTable::instance().lookup(text);
+    } else if (text == "i64") {
+        type = TokenType::Integer;  // Treat as type hint for now, or add Kw_I64 if token.h has it
+        std::cerr << "[LEXER] Found i64 type" << std::endl;
+    }
     
     Token token;
     token.type = type;
@@ -798,30 +832,6 @@ void Lexer::handle_indentation() {
         }
     }
     
-
-     // Skip if line is empty or starts with a closing bracket
-     // These should not affect indentation tracking
-     if (position_ >= source_.size()) {
-         return;  // Empty line
-     }
-     char next_char = peek_char();
-     if (next_char == '}' || next_char == '(' || next_char == ']') {
-         // Do not emit indent/dedent for lines starting with closing brackets
-         return;
-     }
-
- 
-     // Skip if line is empty or starts with a closing bracket
-     // These should not affect indentation tracking
-     if (position_ >= source_.size()) {
-         return;  // Empty line
-     }
-     char next_char = peek_char();
-     if (next_char == '}' || next_char == '(' || next_char == ']') {
-         // Do not emit indent/dedent for lines starting with closing brackets
-         return;
-     }
- 
 
     // Skip if line is empty or starts with a closing bracket
     // These should not affect indentation tracking
