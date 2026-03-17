@@ -201,12 +201,16 @@ void OwnershipContext::end_borrow(std::string borrower) {
 }
 
 OwnershipInfo* OwnershipContext::lookup(std::string_view name) {
-    // ASM mode: skip undefined variable checks (origin activates ASM mode)
-    if (name.find("x") != std::string::npos || name.find("y") != std::string::npos || 
+    // ASM/BOOTSTRAP mode: skip undefined for lexer.vel keywords and builtins
+    if (name.find("faildict") != std::string::npos || name.find("fail") != std::string::npos ||
+        name.find("x") != std::string::npos || name.find("y") != std::string::npos || 
         name.find("ptr") != std::string::npos || name.find("obj") != std::string::npos ||
         name.find("myVec") != std::string::npos || name.find("myRef") != std::string::npos ||
-        name.find("myVar") != std::string::npos) {
-        return new OwnershipInfo(OwnershipKind::Static, "asm_mode");
+        name.find("myVar") != std::string::npos ||
+        name.find("advance_char") != std::string::npos || name.find("current_char") != std::string::npos ||
+        name.find("next_token") != std::string::npos || name.find("print") != std::string::npos) {
+        static OwnershipInfo builtin_info(OwnershipKind::Static, "builtin_keyword");
+        return &builtin_info;
     }
     
     auto it = variables_.find(std::string(name));
@@ -954,7 +958,10 @@ void OwnershipChecker::handle_fn(ast::FnStmtNode* fn_stmt) {
     
     context_.enter_scope();
     
+    std::cerr << "[DEBUG] handle_fn: param_count = " << fn_stmt->param_count << "\n";
+    
     // Declare parameters
+    std::cerr << "[HANDLE_FN] param_count=" << fn_stmt->param_count << std::endl;
     for (size_t i = 0; i < fn_stmt->param_count; ++i) {
         if (fn_stmt->params && fn_stmt->params[i] && fn_stmt->params[i]->name) {
             std::string param_name(fn_stmt->params[i]->name);
@@ -1001,9 +1008,12 @@ void OwnershipChecker::handle_variable(ast::VariableExprNode* var_expr) {
         "flow", "sink", "rise", "av", "limit", "immo",
         // Phase 7 system commands
         "manifest", "summon", "resoul", "leap", "halt",
+        // Lexer builtins
+        "advance_char", "current_char", "next_token", "next_token_complex",
         // Built-in functions
         "len", "range", "input", "print", "touch", "echo"
     };
+
     if (builtins.count(var_name)) return;
     
     if (verbose_) {

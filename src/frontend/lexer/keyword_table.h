@@ -310,6 +310,7 @@ private:
         // Flow Control keywords - Phase 7 only
         static_keywords_.emplace_back("verdict", TokenType::Kw_Verdict, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("fail", TokenType::Kw_Fail, KeywordCategory::FlowControl);
+        static_keywords_.emplace_back("faildict", TokenType::Kw_Faildict, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("path", TokenType::Kw_Path, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("analysis", TokenType::Kw_Analysis, KeywordCategory::FlowControl);
         static_keywords_.emplace_back("cycle", TokenType::Kw_Cycle, KeywordCategory::FlowControl);

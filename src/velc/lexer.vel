@@ -1,0 +1,47 @@
+manifest TOK_BRACE_OPEN = 1
+manifest TOK_BRACE_CLOSE = 2
+manifest TOK_PAREN_OPEN = 3
+manifest TOK_PAREN_CLOSE = 4
+manifest TOK_SEMI = 5
+manifest TOK_COLON = 6
+manifest TOK_IDENT = 10
+manifest TOK_INTEGER = 11
+
+feat is_digit(c) {
+    verdict c >= '0' and c <= '9' {
+        true
+    } fail {
+        false
+    }
+}
+
+feat next_token() {
+    verdict current_char == ' ' or current_char == '\n' or current_char == '\t' {
+        advance_char()
+        next_token()
+    } faildict current_char == '{' {
+        print(TOK_BRACE_OPEN)
+        advance_char()
+    } faildict current_char == '}' {
+        print(TOK_BRACE_CLOSE)
+        advance_char()
+    } faildict current_char == '(' {
+        print(TOK_PAREN_OPEN)
+        advance_char()
+    } faildict current_char == ')' {
+        print(TOK_PAREN_CLOSE)
+        advance_char()
+    } faildict current_char == ';' {
+        print(TOK_SEMI)
+        advance_char()
+    } faildict current_char == ':' {
+        print(TOK_COLON)
+        advance_char()
+    } faildict current_char >= '0' and current_char <= '9' {
+        print(TOK_INTEGER)
+        advance_char()
+    } fail {
+        print(TOK_IDENT)
+        advance_char()
+    }
+}

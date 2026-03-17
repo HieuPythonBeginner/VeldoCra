@@ -271,11 +271,7 @@ Stmt* Parser::parse_statement() {
         return parse_if_statement();
     }
     
-    // Also handle fail explicitly (for if-else chains where fail wasn't consumed)
-    if (check(TokenType::Kw_Fail)) {
-        std::cerr << "[PARSER] Found standalone Kw_Fail - treating as block end marker" << std::endl;
-        return nullptr; // Signal block end for parent
-    }
+
     
     // NEW: Handle traditional control keywords as Identifiers with lookahead
     if (check(TokenType::Identifier) || check(TokenType::Kw_Feat) || check(TokenType::Kw_Fn) || check(TokenType::Kw_Race)) {
@@ -554,11 +550,9 @@ BlockStmtNode* Parser::parse_hybrid_block_body() {
         
         // FIXED: Skip DEDENT only if inside proper indented block (not at brace level)
         // Detect brace context by checking if we saw BraceOpen earlier (simplified: skip only once per block)
-        static thread_local bool skipped_dedent_once = false;
-        if (check(TokenType::Dedent) && !skipped_dedent_once) {
+        if (check(TokenType::Dedent)) {
             std::cerr << "[PARSER] parse_hybrid_block_body: skipping single DEDENT" << std::endl;
             advance();
-            skipped_dedent_once = true;
             if (check(TokenType::BraceClose)) {
                 std::cerr << "[PARSER] parse_hybrid_block_body: BraceClose after DEDENT, breaking" << std::endl;
                 break;
@@ -567,6 +561,13 @@ BlockStmtNode* Parser::parse_hybrid_block_body() {
         }
         
         if (is_at_end()) break;
+        
+        // BOOTSTRAP SYNC: Skip braces before parse_statement
+        if (check(TokenType::BraceClose) || check(TokenType::BraceOpen)) {
+            std::cerr << "[PARSER] Skipping brace in block: " << static_cast<int>(current_token().type) << std::endl;
+            advance();
+            continue;
+        }
         
         std::cerr << "[PARSER] parse_hybrid_block_body: calling parse_statement (token=" 
                   << static_cast<int>(current_token().type) << ")" << std::endl;
@@ -580,7 +581,6 @@ BlockStmtNode* Parser::parse_hybrid_block_body() {
         }
         
         // Reset dedent skip for next statement
-        skipped_dedent_once = false;
         
         // Skip newlines between statements
         while (check(TokenType::Newline)) {
@@ -626,7 +626,7 @@ BlockStmtNode* Parser::parse_hybrid_block_body_colon() {
         
         // FIX: Check for fail keyword at START OF LINE (after newline) - block terminator for if-else
         // Must check this BEFORE calling parse_statement since fail is a keyword
-        if (check(TokenType::Kw_Fail)) {
+        if (check(TokenType::Kw_Fail) || check(TokenType::Kw_Faildict)) {
             // This is the else branch - don't consume it, let the parent handle it
             break;
         }
@@ -771,22 +771,11 @@ FnStmtNode* Parser::parse_function_definition() {
         advance();
         
         while (!check(TokenType::ParenClose) && !is_at_end()) {
-            if (check(TokenType::Identifier)) {
-                ParamDeclNode* param = builder_.create<ParamDeclNode>();
-                param->kind = NodeKind::ParamDecl;
-                param->name = get_token_text(current_token());
-                param->type_expr = nullptr;
-                param->default_value = nullptr;
-                advance();
-                
+            ParamDeclNode* param = parse_parameter();
+            if (param) {
                 builder_.add_param(fn, param);
-                
-                if (check(TokenType::Comma)) {
-                    advance();
-                }
-            } else {
-                break;
             }
+            if (!match(TokenType::Comma)) break;
         }
         
         if (check(TokenType::ParenClose)) {
@@ -816,6 +805,7 @@ FnStmtNode* Parser::parse_function_definition() {
  * @brief Parse parameter
  */
 ParamDeclNode* Parser::parse_parameter() {
+    std::cerr << "[PARAM] token type = " << static_cast<int>(current_token().type) << " text = " << get_token_view(current_token()) << std::endl;
     if (!check(TokenType::Identifier)) {
         return nullptr;
     }
@@ -871,23 +861,36 @@ IfStmtNode* Parser::parse_if_statement() {
     
     // Handle ELSE keywords - only NEW (fail) is in FlowControl category
     Stmt* else_branch = nullptr;
-    if (check(TokenType::Kw_Fail)) {
-        std::cerr << "[PARSER] parse_if_statement: found fail!" << std::endl;
+    if (check(TokenType::Kw_Fail) || check(TokenType::Kw_Faildict)) {
+        bool is_faildict = current_token().type == TokenType::Kw_Faildict;
         advance();
-        
-        // Skip newlines after fail
         while (check(TokenType::Newline)) {
             advance();
         }
         
-        // Check for else-if chain: fail verdict cond { }
-        if (check(TokenType::Kw_Verdict)) {
-            std::cerr << "[PARSER] parse_if_statement: found fail verdict (else-if chain)" << std::endl;
-            else_branch = parse_if_statement();  // Recursive call handles next verdict
+        if (is_faildict) {
+            // faildict already consumed - parse condition and body directly
+            Expr* elif_cond = parse_expression();
+            Stmt* elif_then = parse_hybrid_block();
+            while (check(TokenType::Newline) || check(TokenType::Dedent)) advance();
+            Stmt* elif_else = nullptr;
+            if (check(TokenType::Kw_Fail) || check(TokenType::Kw_Faildict)) {
+                bool next_faildict = current_token().type == TokenType::Kw_Faildict;
+                advance();
+                while (check(TokenType::Newline)) advance();
+                if (next_faildict || check(TokenType::Kw_Verdict)) {
+                    elif_else = parse_if_statement();
+                } else {
+                    elif_else = parse_hybrid_block();
+                }
+            }
+            else_branch = builder_.create_if(elif_cond, elif_then, elif_else);
+        } else if (check(TokenType::Kw_Verdict)) {
+            else_branch = parse_if_statement();
         } else {
-            std::cerr << "[PARSER] parse_if_statement: plain fail else branch" << std::endl;
             else_branch = parse_hybrid_block();
         }
+        std::cerr << "[PARSER] parse_if_statement: found fail!" << std::endl;
     }
     
     return builder_.create_if(condition, then_branch, else_branch);
@@ -1295,6 +1298,25 @@ Expr* Parser::parse_primary() {
         }
         
         return call;
+    }
+    
+    // BOOTSTRAP FIX for lexer.vel: Skip braces, fail keywords, operators
+    if (check(TokenType::BraceClose) || check(TokenType::BraceOpen)) {
+        std::cerr << "[PARSER] Skipping brace: " << static_cast<int>(current_token().type) << std::endl;
+        advance();
+        return builder_.create_none();
+    }
+    if (check(TokenType::Kw_Fail) || check(TokenType::Kw_Faildict)) {
+        std::cerr << "[PARSER] Skipping fail keyword: " << static_cast<int>(current_token().type) << std::endl;
+        const char* name = get_token_text(current_token());
+        advance();
+        return builder_.create_variable(name);
+    }
+    if (check(TokenType::Eq) || check(TokenType::Neq) || check(TokenType::Lt) || check(TokenType::Gt) ||
+        check(TokenType::Lte) || check(TokenType::Gte)) {
+        std::cerr << "[PARSER] Skipping operator: " << static_cast<int>(current_token().type) << std::endl;
+        advance();
+        return builder_.create_none();
     }
     
     // CRITICAL FIX: Always advance on unexpected token to prevent infinite loop!

@@ -62,8 +62,6 @@ TokenStream Lexer::tokenize() {
         // Get next token
         Token token = current_;
         
-        std::cerr << "[LEXER] Char: " << peek_char() << " -> Processing token type: " << static_cast<int>(token.type) << std::endl;
-        
         // Skip certain tokens
         if (token.type == TokenType::Comment) {
             current_ = next_token();
@@ -121,9 +119,14 @@ TokenStream Lexer::tokenize() {
  * @brief Get next token
  */
 Token Lexer::next_token() {
-    // Skip whitespace at line start
+    // Skip whitespace at line start ONLY if the next char is not a closing bracket/punctuation
+    // This prevents skipping } which should be tokenized as BraceClose
     if (at_line_start_) {
-        skip_whitespace();
+        char c = peek_char();
+        // Don't skip if next char is a closing bracket or punctuation
+        if (c != '}' && c != ')' && c != ']' && c != ';' && c != ':' && c != ',') {
+            skip_whitespace();
+        }
     }
     
     // Check for end of source
@@ -355,7 +358,9 @@ Token Lexer::scan_identifier() {
     uint32_t start_line = line_;
     uint32_t start_column = column_;
     
-    // Read identifier
+
+    advance_char(); // consume first char
+    // Read rest of identifier
     while (position_ < source_.size() && is_alphanumeric(peek_char())) {
         advance_char();
     }
@@ -442,7 +447,8 @@ Token Lexer::scan_identifier() {
         "import", "from", "as", "absorb", "federation", "legion", "proclaim", "alias", "domain",
         // Special - kept
         "print", "true", "false", "None", "and", "or", "not",
-        "cmt", "mul_cmt"
+        "cmt", "mul_cmt",
+        "faildict"
     };
     
     if (phase7_keywords.count(std::string(text))) {

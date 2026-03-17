@@ -69,7 +69,7 @@ enum class TokenType : uint16_t {
     Kw_Evolve,       // mut
     Kw_Species,      // type
     
-    // Causality Control (Flow)
+// Causality Control (Flow)
     Kw_Verdict,      // if
     Kw_Fail,         // else
     Kw_Path,         // switch
@@ -196,6 +196,8 @@ enum class TokenType : uint16_t {
     
     // Comment
     Comment,
+    
+    Kw_Faildict,   // faildict - else-if alias
     
     // Count for sizing
     COUNT

@@ -481,6 +481,7 @@ FnStmtNode* ASTBuilder::create_fn(const char* name) {
 }
 
 void ASTBuilder::add_param(FnStmtNode* fn, ParamDeclNode* param) {
+    std::cerr << "[ADD_PARAM] called, fn=" << (fn ? fn->name : "null") << " param=" << (param && param->name ? param->name : "null") << std::endl;
     // Expand params array if needed (simplified - in production would use arena)
     ParamDeclNode** new_params = static_cast<ParamDeclNode**>(
         arena_.allocate((fn->param_count + 1) * sizeof(ParamDeclNode*), alignof(ParamDeclNode*)));
