@@ -1,0 +1,10 @@
+v0.12.0-alpha
+
+Phase 12 Freeze:
+- Lexer/parser self-host (lexer.vel check PASS)
+- Ownership 5-layer active (no-crash)
+- Hybrid syntax ; optional (Phase12 TODO)
+- VSCode ext full (neon/rainbow themes, icons)
+- Tests: fizzbuzz/fib/phase7 PASS
+
+Next: v0.13.0-beta (VM run + binary out)
