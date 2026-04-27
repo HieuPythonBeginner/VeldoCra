@@ -1,0 +1,15 @@
+# Test basic functionality - no pattern matching
+feat main() {
+    # Test basic variables
+    av x = 42;
+    av y = 100;
+    
+    # Simple arithmetic
+    av z = x + y;
+    
+    # Print result
+    scribe("Result: ");
+    scribe(z);
+    
+    scale 0;
+}

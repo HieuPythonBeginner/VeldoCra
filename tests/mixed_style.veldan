@@ -1,0 +1,39 @@
+# Test file with MIXED styles - Phase 11.1 Hybrid Stress Test
+# Mix of statements with and without semicolons
+
+# With semicolons
+av x = 42;
+av y = 100;
+
+# Without semicolons
+av z = x + y;
+
+# With semicolon
+av a = 10;
+
+# Without semicolon
+av b = 20;
+
+# With semicolon
+av c = a * b;
+
+# Without semicolon
+av result = (x + y) * 2;
+
+# Print without semicolons
+print("Test: Mixed styles work!");
+
+# With semicolons - demonstrating hybrid flexibility
+av val1 = 1;
+av val2 = 2;
+av val3 = 3;
+
+# Expression statements mixed
+x + y;
+a * b;
+
+# All on one line with semicolons
+av q = 1; av w = 2; av e = 3;
+
+print("SUCCESS: Hybrid styles work perfectly!");
+

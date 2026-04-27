@@ -1,0 +1,131 @@
+[PARSER] parse_program: initial token type = 43
+[PARSER] parse_statement: token type = 43
+[PARSER] parse_block: current token = 123
+[PARSER] parse_block_body: starting, end_token = 124, current token = 2
+[PARSER] parse_block_body: calling parse_statement (token=39)
+[PARSER] parse_statement: token type = 39
+[PARSER] parse_simple_statement: current token type = 39 text = 'manifest'
+[PARSER] parse_manifest_statement: starting
+[PARSER] parse_manifest_statement: after advance, current token type = 5
+[PARSER] parse_manifest_statement: variable name = [5] = x
+[PARSER] parse_manifest_statement: found '='
+[PARSER] parse_manifest_statement: found ';'
+[PARSER] parse_manifest_statement: result = 0x72b7b6eff118
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = '
+'
+Parse Error (line 8, col 1): Expected ';' at end of expression statement
+[PARSER] parse_block_body: calling parse_statement (token=13)
+[PARSER] parse_statement: token type = 13
+[PARSER] Found if/verdict, dispatching to parse_if_statement()
+[PARSER] parse_block: current token = 123
+[PARSER] parse_block_body: starting, end_token = 124, current token = 2
+[PARSER] parse_block_body: calling parse_statement (token=39)
+[PARSER] parse_statement: token type = 39
+[PARSER] parse_simple_statement: current token type = 39 text = 'manifest'
+[PARSER] parse_manifest_statement: starting
+[PARSER] parse_manifest_statement: after advance, current token type = 5
+[PARSER] parse_manifest_statement: variable name = [5] = y
+[PARSER] parse_manifest_statement: found '='
+[PARSER] parse_manifest_statement: found ';'
+[PARSER] parse_manifest_statement: result = 0x72b7b6eff2e8
+[PARSER] parse_block_body: calling parse_statement (token=45)
+[PARSER] parse_statement: token type = 45
+[PARSER] parse_simple_statement: current token type = 45 text = 'ego'
+[PARSER] parse_block_body: found end token, breaking
+[PARSER] parse_block_body: exiting, current token = 124
+[PARSER] parse_block: consuming BraceClose }
+[PARSER] parse_if_statement: after then_branch, current token = 2 text = '
+'
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = '
+'
+Parse Error (line 14, col 1): Expected ';' at end of expression statement
+[PARSER] parse_block_body: calling parse_statement (token=16)
+[PARSER] parse_statement: token type = 16
+[PARSER] Found for/cycle, dispatching to parse_for_statement()
+[PARSER] parse_block: current token = 2
+[PARSER] parse_statement: token type = 39
+[PARSER] parse_simple_statement: current token type = 39 text = 'manifest'
+[PARSER] parse_manifest_statement: starting
+[PARSER] parse_manifest_statement: after advance, current token type = 5
+[PARSER] parse_manifest_statement: variable name = [5] = z
+[PARSER] parse_manifest_statement: found '='
+[PARSER] Found modulo/arith op: 91
+[PARSER] parse_manifest_statement: found ';'
+[PARSER] parse_manifest_statement: result = 0x72b7b6eff620
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = '
+'
+Parse Error (line 18, col 1): Expected ';' at end of expression statement
+[PARSER] parse_block_body: calling parse_statement (token=17)
+[PARSER] parse_statement: token type = 17
+[PARSER] Found while/sustain, dispatching to parse_while_statement()
+[PARSER] parse_block: current token = 123
+[PARSER] parse_block_body: starting, end_token = 124, current token = 2
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = 'x'
+[PARSER] parse_block_body: found end token, breaking
+[PARSER] parse_block_body: exiting, current token = 124
+[PARSER] parse_block: consuming BraceClose }
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = '
+'
+Parse Error (line 23, col 1): Expected ';' at end of expression statement
+[PARSER] parse_block_body: calling parse_statement (token=13)
+[PARSER] parse_statement: token type = 13
+[PARSER] Found if/verdict, dispatching to parse_if_statement()
+[PARSER] parse_block: current token = 2
+[PARSER] parse_statement: token type = 16
+[PARSER] Found for/cycle, dispatching to parse_for_statement()
+[PARSER] parse_block: current token = 123
+[PARSER] parse_block_body: starting, end_token = 124, current token = 2
+[PARSER] parse_block_body: calling parse_statement (token=45)
+[PARSER] parse_statement: token type = 45
+[PARSER] parse_simple_statement: current token type = 45 text = 'ego'
+[PARSER] parse_block_body: found end token, breaking
+[PARSER] parse_block_body: exiting, current token = 124
+[PARSER] parse_block: consuming BraceClose }
+[PARSER] parse_if_statement: after then_branch, current token = 2 text = '
+'
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = '
+'
+Parse Error (line 29, col 1): Expected ';' at end of expression statement
+[PARSER] parse_block_body: calling parse_statement (token=16)
+[PARSER] parse_statement: token type = 16
+[PARSER] Found for/cycle, dispatching to parse_for_statement()
+[PARSER] parse_block: current token = 123
+[PARSER] parse_block_body: starting, end_token = 124, current token = 2
+[PARSER] parse_block_body: calling parse_statement (token=39)
+[PARSER] parse_statement: token type = 39
+[PARSER] parse_simple_statement: current token type = 39 text = 'manifest'
+[PARSER] parse_manifest_statement: starting
+[PARSER] parse_manifest_statement: after advance, current token type = 5
+[PARSER] parse_manifest_statement: variable name = [5] = w
+[PARSER] parse_manifest_statement: found '='
+[PARSER] Found modulo/arith op: 91
+[PARSER] parse_manifest_statement: found ';'
+[PARSER] parse_manifest_statement: result = 0x72b7b6efff20
+[PARSER] parse_block_body: found end token, breaking
+[PARSER] parse_block_body: exiting, current token = 124
+[PARSER] parse_block: consuming BraceClose }
+[PARSER] parse_block_body: calling parse_statement (token=5)
+[PARSER] parse_statement: token type = 5
+[PARSER] parse_simple_statement: current token type = 5 text = '
+'
+Parse Error (line 33, col 10): Expected ';' at end of expression statement
+[PARSER] parse_block_body: calling parse_statement (token=74)
+[PARSER] parse_statement: token type = 74
+[PARSER] parse_block_body: found end token, breaking
+[PARSER] parse_block_body: exiting, current token = 124
+[PARSER] parse_block: consuming BraceClose }
+[PARSER] Returning block: 0x72b7b6eff010 kind=14
+Parse error: 6 parse error(s) at line 0, col 0
+Error: Parsing failed

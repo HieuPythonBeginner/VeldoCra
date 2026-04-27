@@ -1,0 +1,33 @@
+# Test Function Definition Keywords
+# ability (public), feat (lambda), hax (private)
+
+av x = 5;
+
+# Test ability (public function)
+ability greet(name) {
+    scribe("Hello from ability: ");
+    scribe(name);
+}
+
+# Test feat (lambda function)
+feat add(a, b) {
+    return a + b;
+}
+
+# Test hax (private function)
+hax multiply(x, y) {
+    return x * y;
+}
+
+# Call the functions
+greet("VeldoCra");
+
+av result1 = add(3, 4);
+scribe("3 + 4 = ");
+scribe(result1);
+
+av result2 = multiply(6, 7);
+scribe("6 * 7 = ");
+scribe(result2);
+
+scribe("All function keywords working!");

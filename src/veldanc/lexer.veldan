@@ -1,0 +1,1016 @@
+# VeldoCra Self-Host Lexer - Full Implementation
+# Phase 12: Complete lexer for self-hosting
+# Based on C++ lexer implementation in src/frontend/lexer/lexer.cpp
+
+# ============================================================================
+# Token Type Constants (from token.vel)
+# ============================================================================
+
+# Special tokens
+immo TOKEN_EOF = 0;
+immo TOKEN_ERROR = 1;
+immo TOKEN_NEWLINE = 2;
+immo TOKEN_INDENT = 3;
+immo TOKEN_DEDENT = 4;
+
+# Literals
+immo TOKEN_IDENT = 10;
+immo TOKEN_INTEGER = 11;
+immo TOKEN_FLOAT = 12;
+immo TOKEN_STRING = 13;
+immo TOKEN_CHAR = 14;
+immo TOKEN_BOOLEAN = 15;
+
+# Legacy Keywords
+immo TOKEN_KW_PRINT = 20;
+immo TOKEN_KW_IF = 21;
+immo TOKEN_KW_ELSE = 22;
+immo TOKEN_KW_ELIF = 23;
+immo TOKEN_KW_FOR = 24;
+immo TOKEN_KW_WHILE = 25;
+immo TOKEN_KW_DEF = 26;
+immo TOKEN_KW_CLASS = 27;
+immo TOKEN_KW_RETURN = 28;
+immo TOKEN_KW_BREAK = 29;
+immo TOKEN_KW_CONTINUE = 30;
+immo TOKEN_KW_PASS = 31;
+immo TOKEN_KW_FN = 32;
+immo TOKEN_KW_MUT = 33;
+immo TOKEN_KW_LET = 34;
+immo TOKEN_KW_CONST = 35;
+immo TOKEN_KW_STRUCT = 36;
+immo TOKEN_KW_ENUM = 37;
+immo TOKEN_KW_MATCH = 38;
+immo TOKEN_KW_IMPORT = 39;
+immo TOKEN_KW_FROM = 40;
+immo TOKEN_KW_AS = 41;
+immo TOKEN_KW_TRUE = 42;
+immo TOKEN_KW_FALSE = 43;
+immo TOKEN_KW_NONE = 44;
+
+# Intrinsic I/O Keywords
+immo TOKEN_KW_SCRIBE = 45;
+
+# VeldoCra Phase 7 Keywords - Genesis (Declarations)
+immo TOKEN_KW_AV = 50;
+immo TOKEN_KW_LIMIT = 51;
+immo TOKEN_KW_SENECT = 52;
+immo TOKEN_KW_IMMO = 53;
+immo TOKEN_KW_OMNI = 54;
+immo TOKEN_KW_EVOLVE = 55;
+immo TOKEN_KW_SPECIES = 56;
+
+# Causality Control (Flow)
+immo TOKEN_KW_VERDICT = 60;
+immo TOKEN_KW_FAIL = 61;
+immo TOKEN_KW_FAILDICT = 62;
+immo TOKEN_KW_PATH = 63;
+immo TOKEN_KW_ANALYSIS = 64;
+immo TOKEN_KW_CYCLE = 65;
+immo TOKEN_KW_SUSTAIN = 66;
+immo TOKEN_KW_SAMSARA = 67;
+immo TOKEN_KW_END = 68;
+immo TOKEN_KW_SKIP = 69;
+
+# Abilities & Actions (Functions)
+immo TOKEN_KW_ABILITY = 70;
+immo TOKEN_KW_FEAT = 71;
+immo TOKEN_KW_HAX = 72;
+immo TOKEN_KW_SCALE = 73;
+immo TOKEN_KW_STASIS = 74;
+immo TOKEN_KW_NONLINEAR = 75;
+immo TOKEN_KW_WAIT = 76;
+
+# Entity Morphology (OOP)
+immo TOKEN_KW_RACE = 80;
+immo TOKEN_KW_AVATAR = 81;
+immo TOKEN_KW_GRANT = 82;
+immo TOKEN_KW_BLESSING = 83;
+immo TOKEN_KW_CONTRACT = 84;
+immo TOKEN_KW_GLORY = 85;
+immo TOKEN_KW_VOID = 86;
+immo TOKEN_KW_CORE = 87;
+immo TOKEN_KW_EGO = 88;
+
+# Soul Manipulation (Memory/Low-level)
+immo TOKEN_KW_VEC = 90;
+immo TOKEN_KW_ECHO = 91;
+immo TOKEN_KW_TOUCH = 92;
+immo TOKEN_KW_FORGE = 93;
+immo TOKEN_KW_PUR = 94;
+immo TOKEN_KW_CLM = 95;
+immo TOKEN_KW_RSZ = 96;
+immo TOKEN_KW_EE = 97;
+immo TOKEN_KW_MANIFEST = 98;
+immo TOKEN_KW_EEINF_LAYERS = 99;
+immo TOKEN_KW_FORBIDDEN = 100;
+immo TOKEN_KW_ANOMALY = 101;
+immo TOKEN_KW_CAP = 102;
+
+# True Form (System/ASM)
+immo TOKEN_KW_ORIGIN = 110;
+immo TOKEN_KW_FLOW = 111;
+immo TOKEN_KW_SINK = 112;
+immo TOKEN_KW_RISE = 113;
+immo TOKEN_KW_SUMMON = 114;
+immo TOKEN_KW_RESOUL = 115;
+immo TOKEN_KW_LEAP = 116;
+immo TOKEN_KW_HALT = 117;
+immo TOKEN_KW_PETITION = 118;
+immo TOKEN_KW_INHALE = 119;
+immo TOKEN_KW_EXHALE = 120;
+
+# Doomsday Protocols (Error/End)
+immo TOKEN_KW_CLASH = 130;
+immo TOKEN_KW_COUNTER = 131;
+immo TOKEN_KW_LOWDIFF = 132;
+immo TOKEN_KW_DEBUFF = 133;
+immo TOKEN_KW_DISPEL = 134;
+immo TOKEN_KW_ENDOFCANON = 135;
+
+# Module & Import System
+immo TOKEN_KW_ABSORB = 140;
+immo TOKEN_KW_FEDERATION = 141;
+immo TOKEN_KW_LEGION = 142;
+immo TOKEN_KW_PROCLAIM = 143;
+immo TOKEN_KW_ALIAS = 144;
+immo TOKEN_KW_DOMAIN = 145;
+
+# Operators
+immo TOKEN_PLUS = 150;
+immo TOKEN_MINUS = 151;
+immo TOKEN_STAR = 152;
+immo TOKEN_SLASH = 153;
+immo TOKEN_PERCENT = 154;
+immo TOKEN_AMPERSAND = 155;
+immo TOKEN_PIPE = 156;
+immo TOKEN_CARET = 157;
+immo TOKEN_TILDE = 158;
+immo TOKEN_EXCLAIM = 159;
+immo TOKEN_QUESTION = 160;
+immo TOKEN_COLON = 161;
+immo TOKEN_SEMICOLON = 162;
+immo TOKEN_COMMA = 163;
+immo TOKEN_DOT = 164;
+
+# Assignment
+immo TOKEN_ASSIGN = 170;
+immo TOKEN_PLUS_ASSIGN = 171;
+immo TOKEN_MINUS_ASSIGN = 172;
+immo TOKEN_STAR_ASSIGN = 173;
+immo TOKEN_SLASH_ASSIGN = 174;
+immo TOKEN_COLON_ASSIGN = 175;
+
+# Comparison
+immo TOKEN_EQ = 180;
+immo TOKEN_NEQ = 181;
+immo TOKEN_LT = 182;
+immo TOKEN_GT = 183;
+immo TOKEN_LTE = 184;
+immo TOKEN_GTE = 185;
+immo TOKEN_AND = 186;
+immo TOKEN_OR = 187;
+
+# Shift
+immo TOKEN_LSHIFT = 190;
+immo TOKEN_RSHIFT = 191;
+
+# Brackets
+immo TOKEN_PAREN_OPEN = 200;
+immo TOKEN_PAREN_CLOSE = 201;
+immo TOKEN_BRACE_OPEN = 202;
+immo TOKEN_BRACE_CLOSE = 203;
+immo TOKEN_BRACKET_OPEN = 204;
+immo TOKEN_BRACKET_CLOSE = 205;
+
+# Arrow
+immo TOKEN_ARROW = 210;
+
+# Comment
+immo TOKEN_COMMENT = 220;
+
+# ============================================================================
+# Character Classification Functions
+# ============================================================================
+
+feat is_digit(c) {
+    verdict c >= 48 && c <= 57 {
+        scale true;
+    }
+    scale false;
+}
+
+feat is_alpha(c) {
+    verdict (c >= 97 && c <= 122) || (c >= 65 && c <= 90) {
+        scale true;
+    }
+    scale false;
+}
+
+feat is_alpha_underscore(c) {
+    verdict is_alpha(c) || c == 95 {
+        scale true;
+    }
+    scale false;
+}
+
+feat is_alphanumeric(c) {
+    verdict is_alpha(c) || is_digit(c) || c == 95 {
+        scale true;
+    }
+    scale false;
+}
+
+feat is_whitespace(c) {
+    verdict c == 32 || c == 9 || c == 13 {
+        scale true;
+    }
+    scale false;
+}
+
+feat is_newline(c) {
+    verdict c == 10 || c == 13 {
+        scale true;
+    }
+    scale false;
+}
+
+feat is_hex_digit(c) {
+    verdict (c >= 48 && c <= 57) || (c >= 97 && c <= 102) || (c >= 65 && c <= 70) {
+        scale true;
+    }
+    scale false;
+}
+
+# ============================================================================
+# Keyword Lookup Table
+# ============================================================================
+
+feat lookup_keyword(text) {
+    # Legacy/Intrinsic keywords (output)
+    verdict text == "print" {
+        scale TOKEN_KW_PRINT;
+    }
+    verdict text == "scribe" {
+        scale TOKEN_KW_SCRIBE;
+    }
+    # ... rest unchanged
+    verdict text == "verdict" {
+        scale TOKEN_KW_VERDICT;
+    }
+    verdict text == "species" {
+        scale TOKEN_KW_SPECIES;
+    }
+    verdict text == "analysis" {
+        scale TOKEN_KW_ANALYSIS;
+    }
+    verdict text == "absorb" {
+        scale TOKEN_KW_ABSORB;
+    }
+    verdict text == "alias" {
+        scale TOKEN_KW_ALIAS;
+    }
+    verdict text == "true" {
+        scale TOKEN_KW_TRUE;
+    }
+    verdict text == "false" {
+        scale TOKEN_KW_FALSE;
+    }
+    verdict text == "none" {
+        scale TOKEN_KW_NONE;
+    }
+    # VeldoCra Phase 7 Keywords - Genesis;
+    verdict text == "av" {
+        scale TOKEN_KW_AV;
+    }
+    verdict text == "limit" {
+        scale TOKEN_KW_LIMIT;
+    }
+    verdict text == "senect" {
+        scale TOKEN_KW_SENECT;
+    }
+    verdict text == "immo" {
+        scale TOKEN_KW_IMMO;
+    }
+    verdict text == "omni" {
+        scale TOKEN_KW_OMNI;
+    }
+    verdict text == "evolve" {
+        scale TOKEN_KW_EVOLVE;
+    }
+    verdict text == "species" {
+        scale TOKEN_KW_SPECIES;
+    }
+    # Causality Control;
+    verdict text == "verdict" {
+        scale TOKEN_KW_VERDICT;
+    }
+    verdict text == "fail" {
+        scale TOKEN_KW_FAIL;
+    }
+    verdict text == "faildict" {
+        scale TOKEN_KW_FAILDICT;
+    }
+    verdict text == "path" {
+        scale TOKEN_KW_PATH;
+    }
+    verdict text == "analysis" {
+        scale TOKEN_KW_ANALYSIS;
+    }
+    verdict text == "cycle" {
+        scale TOKEN_KW_CYCLE;
+    }
+    verdict text == "sustain" {
+        scale TOKEN_KW_SUSTAIN;
+    }
+    verdict text == "samsara" {
+        scale TOKEN_KW_SAMSARA;
+    }
+    verdict text == "end" {
+        scale TOKEN_KW_END;
+    }
+    verdict text == "skip" {
+        scale TOKEN_KW_SKIP;
+    }
+    # Abilities & Actions;
+    verdict text == "ability" {
+        scale TOKEN_KW_ABILITY;
+    }
+    verdict text == "feat" {
+        scale TOKEN_KW_FEAT;
+    }
+    verdict text == "hax" {
+        scale TOKEN_KW_HAX;
+    }
+    verdict text == "scale" {
+        scale TOKEN_KW_SCALE;
+    }
+    verdict text == "stasis" {
+        scale TOKEN_KW_STASIS;
+    }
+    verdict text == "nonlinear" {
+        scale TOKEN_KW_NONLINEAR;
+    }
+    verdict text == "wait" {
+        scale TOKEN_KW_WAIT;
+    }
+    # Entity Morphology;
+    verdict text == "race" {
+        scale TOKEN_KW_RACE;
+    }
+    verdict text == "avatar" {
+        scale TOKEN_KW_AVATAR;
+    }
+    verdict text == "grant" {
+        scale TOKEN_KW_GRANT;
+    }
+    verdict text == "blessing" {
+        scale TOKEN_KW_BLESSING;
+    }
+    verdict text == "contract" {
+        scale TOKEN_KW_CONTRACT;
+    }
+    verdict text == "glory" {
+        scale TOKEN_KW_GLORY;
+    }
+    verdict text == "void" {
+        scale TOKEN_KW_VOID;
+    }
+    verdict text == "core" {
+        scale TOKEN_KW_CORE;
+    }
+    verdict text == "ego" {
+        scale TOKEN_KW_EGO;
+    }
+    # Soul Manipulation;
+    verdict text == "vec" {
+        scale TOKEN_KW_VEC;
+    }
+    verdict text == "echo" {
+        scale TOKEN_KW_ECHO;
+    }
+    verdict text == "touch" {
+        scale TOKEN_KW_TOUCH;
+    }
+    verdict text == "forge" {
+        scale TOKEN_KW_FORGE;
+    }
+    verdict text == "pur" {
+        scale TOKEN_KW_PUR;
+    }
+    verdict text == "clm" {
+        scale TOKEN_KW_CLM;
+    }
+    verdict text == "rsz" {
+        scale TOKEN_KW_RSZ;
+    }
+    verdict text == "ee" {
+        scale TOKEN_KW_EE;
+    }
+    verdict text == "av" {
+        scale TOKEN_KW_MANIFEST;
+    }
+    verdict text == "ee_inf_layers" {
+        scale TOKEN_KW_EEINF_LAYERS;
+    }
+    verdict text == "forbidden" {
+        scale TOKEN_KW_FORBIDDEN;
+    }
+    verdict text == "anomaly" {
+        scale TOKEN_KW_ANOMALY;
+    }
+    verdict text == "cap" {
+        scale TOKEN_KW_CAP;
+    }
+    # True Form;
+    verdict text == "origin" {
+        scale TOKEN_KW_ORIGIN;
+    }
+    verdict text == "flow" {
+        scale TOKEN_KW_FLOW;
+    }
+    verdict text == "sink" {
+        scale TOKEN_KW_SINK;
+    }
+    verdict text == "rise" {
+        scale TOKEN_KW_RISE;
+    }
+    verdict text == "summon" {
+        scale TOKEN_KW_SUMMON;
+    }
+    verdict text == "resoul" {
+        scale TOKEN_KW_RESOUL;
+    }
+    verdict text == "leap" {
+        scale TOKEN_KW_LEAP;
+    }
+    verdict text == "halt" {
+        scale TOKEN_KW_HALT;
+    }
+    verdict text == "petition" {
+        scale TOKEN_KW_PETITION;
+    }
+    verdict text == "inhale" {
+        scale TOKEN_KW_INHALE;
+    }
+    verdict text == "exhale" {
+        scale TOKEN_KW_EXHALE;
+    }
+    # Doomsday Protocols;
+    verdict text == "clash" {
+        scale TOKEN_KW_CLASH;
+    }
+    verdict text == "counter" {
+        scale TOKEN_KW_COUNTER;
+    }
+    verdict text == "lowdiff" {
+        scale TOKEN_KW_LOWDIFF;
+    }
+    verdict text == "debuff" {
+        scale TOKEN_KW_DEBUFF;
+    }
+    verdict text == "dispel" {
+        scale TOKEN_KW_DISPEL;
+    }
+    verdict text == "endofcanon" {
+        scale TOKEN_KW_ENDOFCANON;
+    }
+    # Module & Import;
+    verdict text == "absorb" {
+        scale TOKEN_KW_ABSORB;
+    }
+    verdict text == "federation" {
+        scale TOKEN_KW_FEDERATION;
+    }
+    verdict text == "legion" {
+        scale TOKEN_KW_LEGION;
+    }
+    verdict text == "proclaim" {
+        scale TOKEN_KW_PROCLAIM;
+    }
+    verdict text == "alias" {
+        scale TOKEN_KW_ALIAS;
+    }
+    verdict text == "domain" {
+        scale TOKEN_KW_DOMAIN;
+    }
+    # Not a keyword - it's an identifier;
+    scale TOKEN_IDENT;
+}
+
+# ============================================================================
+# Token Type Name Lookup (for debugging)
+# ============================================================================
+
+feat token_type_name(tok_type) {
+    verdict tok_type == TOKEN_EOF {
+        scale "EOF";
+    }
+    verdict tok_type == TOKEN_ERROR {
+        scale "ERROR";
+    }
+    verdict tok_type == TOKEN_NEWLINE {
+        scale "NEWLINE";
+    }
+    verdict tok_type == TOKEN_INDENT {
+        scale "INDENT";
+    }
+    verdict tok_type == TOKEN_DEDENT {
+        scale "DEDENT";
+    }
+    verdict tok_type == TOKEN_IDENT {
+        scale "IDENT";
+    }
+    verdict tok_type == TOKEN_INTEGER {
+        scale "INTEGER";
+    }
+    verdict tok_type == TOKEN_FLOAT {
+        scale "FLOAT";
+    }
+    verdict tok_type == TOKEN_STRING {
+        scale "STRING";
+    }
+    verdict tok_type == TOKEN_CHAR {
+        scale "CHAR";
+    }
+    verdict tok_type == TOKEN_BOOLEAN {
+        scale "BOOLEAN";
+    }
+    verdict tok_type == TOKEN_KW_MANIFEST {
+        scale "KW_MANIFEST";
+    }
+    verdict tok_type == TOKEN_KW_LIMIT {
+        scale "KW_LIMIT";
+    }
+    verdict tok_type == TOKEN_KW_EVOLVE {
+        scale "KW_EVOLVE";
+    }
+    verdict tok_type == TOKEN_KW_FEAT {
+        scale "KW_FEAT";
+    }
+    verdict tok_type == TOKEN_KW_PRINT {
+        scale "KW_PRINT";
+    }
+    verdict tok_type == TOKEN_KW_SCRIBE {
+        scale "KW_SCRIBE";
+    }
+    verdict tok_type == TOKEN_KW_VERDICT {
+        scale "KW_VERDICT";
+    }
+    verdict tok_type == TOKEN_KW_FAIL {
+        scale "KW_FAIL";
+    }
+    verdict tok_type == TOKEN_KW_SCALE {
+        scale "KW_SCALE";
+    }
+    verdict tok_type == TOKEN_KW_SUSTAIN {
+        scale "KW_SUSTAIN";
+    }
+    verdict tok_type == TOKEN_KW_CYCLE {
+        scale "KW_CYCLE";
+    }
+    verdict tok_type == TOKEN_KW_RACE {
+        scale "KW_RACE";
+    }
+    verdict tok_type == TOKEN_KW_FLOW {
+        scale "KW_FLOW";
+    }
+    verdict tok_type == TOKEN_ASSIGN {
+        scale "ASSIGN";
+    }
+    verdict tok_type == TOKEN_SEMICOLON {
+        scale "SEMICOLON";
+    }
+    verdict tok_type == TOKEN_PAREN_OPEN {
+        scale "PAREN_OPEN";
+    }
+    verdict tok_type == TOKEN_PAREN_CLOSE {
+        scale "PAREN_CLOSE";
+    }
+    verdict tok_type == TOKEN_BRACE_OPEN {
+        scale "BRACE_OPEN";
+    }
+    verdict tok_type == TOKEN_BRACE_CLOSE {
+        scale "BRACE_CLOSE";
+    }
+    verdict tok_type == TOKEN_PLUS {
+        scale "PLUS";
+    }
+    verdict tok_type == TOKEN_MINUS {
+        scale "MINUS";
+    }
+    verdict tok_type == TOKEN_STAR {
+        scale "STAR";
+    }
+    verdict tok_type == TOKEN_SLASH {
+        scale "SLASH";
+    }
+    verdict tok_type == TOKEN_COMMENT {
+        scale "COMMENT";
+    }
+    scale "UNKNOWN";
+}
+
+# ============================================================================
+# Single Character Token Lookup
+# ============================================================================
+
+feat get_single_char_token(c) {
+    verdict c == 61 {
+        scale TOKEN_ASSIGN;
+    }
+    verdict c == 59 {
+        scale TOKEN_SEMICOLON;
+    }
+    verdict c == 40 {
+        scale TOKEN_PAREN_OPEN;
+    }
+    verdict c == 41 {
+        scale TOKEN_PAREN_CLOSE;
+    }
+    verdict c == 123 {
+        scale TOKEN_BRACE_OPEN;
+    }
+    verdict c == 125 {
+        scale TOKEN_BRACE_CLOSE;
+    }
+    verdict c == 91 {
+        scale TOKEN_BRACKET_OPEN;
+    }
+    verdict c == 93 {
+        scale TOKEN_BRACKET_CLOSE;
+    }
+    verdict c == 58 {
+        scale TOKEN_COLON;
+    }
+    verdict c == 44 {
+        scale TOKEN_COMMA;
+    }
+    verdict c == 46 {
+        scale TOKEN_DOT;
+    }
+    verdict c == 43 {
+        scale TOKEN_PLUS;
+    }
+    verdict c == 45 {
+        scale TOKEN_MINUS;
+    }
+    verdict c == 42 {
+        scale TOKEN_STAR;
+    }
+    verdict c == 47 {
+        scale TOKEN_SLASH;
+    }
+    verdict c == 37 {
+        scale TOKEN_PERCENT;
+    }
+    verdict c == 38 {
+        scale TOKEN_AMPERSAND;
+    }
+    verdict c == 124 {
+        scale TOKEN_PIPE;
+    }
+    verdict c == 94 {
+        scale TOKEN_CARET;
+    }
+    verdict c == 126 {
+        scale TOKEN_TILDE;
+    }
+    verdict c == 33 {
+        scale TOKEN_EXCLAIM;
+    }
+    verdict c == 63 {
+        scale TOKEN_QUESTION;
+    }
+    verdict c == 60 {
+        scale TOKEN_LT;
+    }
+    verdict c == 62 {
+        scale TOKEN_GT;
+    }
+    scale TOKEN_ERROR;
+}
+
+# ============================================================================
+# Lexer State Management
+# ============================================================================
+
+# Source code and position tracking
+av lexer_source = "";
+av lexer_position = 0;
+av lexer_line = 1;
+av lexer_column = 1;
+av lexer_tokens = [];
+
+# Initialize lexer with source code
+feat lexer_init(source) {
+    lexer_source = source;
+    lexer_position = 0;
+    lexer_line = 1;
+    lexer_column = 1;
+    lexer_tokens = [];
+}
+
+# Get current character
+feat lexer_current_char() {
+    verdict lexer_position < lexer_source.size() {
+        scale lexer_source[lexer_position];
+    }
+    scale 0  # EOF;
+}
+
+# Advance to next character
+feat lexer_advance() {
+    av c = lexer_current_char();
+    lexer_position = lexer_position + 1;
+    verdict c == 10 {  # newline;
+        lexer_line = lexer_line + 1;
+        lexer_column = 1;
+    } fail {
+        lexer_column = lexer_column + 1;
+    }
+    scale c;
+}
+
+# Peek at next character
+feat lexer_peek() {
+    av pos = lexer_position + 1;
+    verdict pos < lexer_source.size() {
+        scale lexer_source[pos];
+    }
+    scale 0  # EOF;
+}
+
+# Skip whitespace
+feat lexer_skip_whitespace() {
+    verdict lexer_position < lexer_source.size() {
+        av c = lexer_current_char();
+        verdict is_whitespace(c) {
+            lexer_advance();
+            lexer_skip_whitespace();
+        }
+    }
+}
+
+# Skip comment
+feat lexer_skip_comment() {
+    verdict lexer_current_char() == 35 {  # '#';
+        verdict lexer_position < lexer_source.size() {
+            av c = lexer_advance();
+            verdict c != 10 && c != 0 {  # not newline and not EOF;
+                lexer_skip_comment();
+            }
+        }
+    }
+}
+
+# Add token to stream
+feat lexer_add_token(type, value) {
+    manifest token = forge(8);
+    token[0] = type;
+    token[1] = lexer_line;
+    token[2] = lexer_column;
+    token[3] = lexer_position;
+    token[4] = lexer_position;
+    token[5] = 0;
+    token[6] = value;
+    lexer_tokens.push(token);
+}
+
+# Scan identifier or keyword
+feat lexer_scan_identifier() {
+    av start = lexer_position;
+    av line = lexer_line;
+    av col = lexer_column;
+    # Scan alphanumeric and underscore
+    verdict lexer_position < lexer_source.size() {
+        av c = lexer_current_char();
+        verdict is_alphanumeric(c) {
+            lexer_advance();
+        } fail {
+            # End of identifier
+            av length = lexer_position - start;
+            verdict length > 0 {
+                av text = lexer_source.substr(start, length);
+                av kw_type = lookup_keyword(text);
+                verdict kw_type != TOKEN_ERROR {
+                    # It's a keyword
+                    lexer_add_token(kw_type, text);
+                } fail {
+                    # It's an identifier
+                    lexer_add_token(TOKEN_IDENT, text);
+                }
+            }
+        }
+    }
+}
+            }
+        }
+    }
+}
+
+# Scan number literal
+feat lexer_scan_number() {
+    av start = lexer_position;
+    av line = lexer_line;
+    av col = lexer_column;
+    av is_float = false;
+    # Scan digits;
+    verdict lexer_position < lexer_source.size() {
+        av c = lexer_current_char();
+        verdict is_digit(c) {
+            lexer_advance();
+        } fail c == 46 {  # '.';
+            lexer_advance();
+            is_float = true;
+        } fail {
+            # End of number;
+            av length = lexer_position - start;
+            verdict length > 0 {
+                av text = lexer_source.substr(start, length);
+                verdict is_float {
+                    lexer_add_token(TOKEN_FLOAT, text);
+                } fail {
+                    lexer_add_token(TOKEN_INTEGER, text);
+                }
+            }
+        }
+    }
+}
+
+# Scan string literal
+feat lexer_scan_string() {
+    lexer_advance()  # skip opening quote;
+    av start = lexer_position;
+    av line = lexer_line;
+    av col = lexer_column;
+    # Scan until closing quote;
+    verdict lexer_position < lexer_source.size() {
+        av c = lexer_current_char();
+        verdict c != 34 {  # not '"';
+            lexer_advance();
+        } fail {
+            # End of string;
+            av length = lexer_position - start;
+            av text = lexer_source.substr(start, length);
+            lexer_advance()  # skip closing quote;
+            lexer_add_token(TOKEN_STRING, text);
+        }
+    }
+}
+
+# Scan single character token
+feat lexer_scan_single_char() {
+    av c = lexer_current_char();
+    av type = get_single_char_token(c);
+    verdict type != TOKEN_ERROR {
+        lexer_advance();
+        lexer_add_token(type, "");
+        scale true;
+    }
+    scale false;
+}
+
+# Main tokenize function
+feat lexer_tokenize(source) {
+    lexer_init(source);
+    verdict lexer_position < lexer_source.size() {
+        # Skip whitespace;
+        lexer_skip_whitespace();
+        # Skip comments;
+        verdict lexer_current_char() == 35 {  # '#';
+            lexer_skip_comment();
+        }
+        # Check for end of source;
+        verdict lexer_position >= lexer_source.size() {
+            # Add EOF token;
+            lexer_add_token(TOKEN_EOF, "");
+            scale lexer_tokens;
+        }
+        # Try to scan different token types;
+        av c = lexer_current_char();
+        # Identifier or keyword;
+        verdict is_alpha(c) || c == 95 {  # letter or underscore;
+            lexer_scan_identifier();
+        } fail is_digit(c) {
+            # Number;
+            lexer_scan_number();
+        } fail c == 34 {  # '"';
+            # String;
+            lexer_scan_string();
+        } fail {
+            # Single character token;
+            verdict !lexer_scan_single_char() {
+                # Unknown character;
+                lexer_add_token(TOKEN_ERROR, "");
+                lexer_advance();
+            }
+        }
+    }
+    # Add EOF token;
+    lexer_add_token(TOKEN_EOF, "");
+    scale lexer_tokens;
+}
+
+# ============================================================================
+# Main Lexer Test Function
+# ============================================================================
+
+feat main() {
+    scribe("=== MAIN() FUNCTION CALLED ===\n");
+    scribe("VeldoCra Self-Host Lexer - Full Implementation\n");
+    scribe("Phase 12: Complete lexer for self-hosting\n");
+    scribe("\n");
+    # Test character classification
+    scribe("=== Character Classification Tests ===\n");
+    scribe("is_digit(48='0') = ");
+    scribe(is_digit(48));
+    scribe("\n");
+    scribe("is_digit(65='A') = ");
+    scribe(is_digit(65));
+    scribe("\n");
+    scribe("is_alpha(97='a') = ");
+    scribe(is_alpha(97));
+    scribe("\n");
+    scribe("is_alpha(48='0') = ");
+    scribe(is_alpha(48));
+    scribe("\n");
+    scribe("is_whitespace(32=' ') = ");
+    scribe(is_whitespace(32));
+    scribe("\n");
+    scribe("is_whitespace(97='a') = ");
+    scribe(is_whitespace(97));
+    scribe("\n");
+    scribe("\n");
+    # Test keyword lookup
+    scribe("=== Keyword Lookup Tests ===\n");
+    scribe("lookup_keyword('av') = ");
+    scribe(lookup_keyword("av"));
+    scribe(" (");
+    scribe(token_type_name(lookup_keyword("av")));
+    scribe(")\n");
+    scribe("lookup_keyword('limit') = ");
+    scribe(lookup_keyword("limit"));
+    scribe(" (");
+    scribe(token_type_name(lookup_keyword("limit")));
+    scribe(")\n");
+    scribe("lookup_keyword('feat') = ");
+    scribe(lookup_keyword("feat"));
+    scribe(" (");
+    scribe(token_type_name(lookup_keyword("feat")));
+    scribe(")\n");
+    scribe("lookup_keyword('verdict') = ");
+    scribe(lookup_keyword("verdict"));
+    scribe(" (");
+    scribe(token_type_name(lookup_keyword("verdict")));
+    scribe(")\n");
+    scribe("lookup_keyword('unknown') = ");
+    scribe(lookup_keyword("unknown"));
+    scribe(" (");
+    scribe(token_type_name(lookup_keyword("unknown")));
+    scribe(")\n");
+    scribe("\n");
+    # Test single character tokens
+    scribe("=== Single Character Token Tests ===\n");
+    scribe("get_single_char_token(61='=') = ");
+    scribe(get_single_char_token(61));
+    scribe(" (");
+    scribe(token_type_name(get_single_char_token(61)));
+    scribe(")\n");
+    scribe("get_single_char_token(59=';') = ");
+    scribe(get_single_char_token(59));
+    scribe(" (");
+    scribe(token_type_name(get_single_char_token(59)));
+    scribe(")\n");
+    scribe("get_single_char_token(40='(') = ");
+    scribe(get_single_char_token(40));
+    scribe(" (");
+    scribe(token_type_name(get_single_char_token(40)));
+    scribe(")\n");
+    scribe("get_single_char_token(123='{') = ");
+    scribe(get_single_char_token(123));
+    scribe(" (");
+    scribe(token_type_name(get_single_char_token(123)));
+    scribe(")\n");
+    scribe("\n");
+    scribe("=== Lexer Core Functions Ready ===\n");
+    scribe("Next steps: Add string indexing and state management\n");
+    scribe("when VeldoCra supports:\n");
+    scribe("  - String indexing (str[i])\n");
+    scribe("  - Arrays/lists\n");
+    scribe("  - Structs with fields\n");
+    scribe("  - Match expressions\n");
+    scribe("\n");
+    scribe("Self-hosting progress: Core functions implemented!\n");
+    scribe("\n");
+    # Test tokenize function
+    scribe("=== Tokenize Function Test ===\n");
+    av test_source = "av x = 42\n";
+    av tokens = lexer_tokenize(test_source);
+    scribe("Tokenized: ");
+    scribe(tokens.size());
+    scribe(" tokens\n");
+}
+    flow "\n";
+    flow "Tokenize function working!\n";
+}

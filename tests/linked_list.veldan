@@ -1,0 +1,23 @@
+race Node {
+    core.value;
+    core.next;
+}
+
+feat new_node(value, next) {
+    av node = forge(16);
+    core.value(node) = value;
+    core.next(node) = next;
+    scale node;
+}
+
+feat main() {
+    av head = new_node(1, 0);
+    core.next(head) = new_node(2, 0);
+    core.next(core.next(head)) = new_node(3, 0);
+    av current = head;
+    sustain current != 0 {
+        flow core.value(current), " ";
+        evolve current = core.next(current);
+    }
+    flow "\n";
+}

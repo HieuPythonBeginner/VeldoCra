@@ -1,0 +1,612 @@
+# VeldoCra Self-Host Code Generator
+# Phase 12: AST to VM instructions
+# Based on C++ VM implementation in src/backend/vm/
+
+# ============================================================================
+# VM Opcode Constants
+# ============================================================================
+
+# Special
+immo OP_HLT = 0;
+immo OP_NOP = 1;
+immo OP_MOV = 2;
+immo OP_MOVI = 3;
+
+# Arithmetic
+immo OP_ADD = 4;
+immo OP_SUB = 5;
+immo OP_MUL = 6;
+immo OP_DIV = 7;
+immo OP_MOD = 8;
+immo OP_NEG = 9;
+
+# Bitwise
+immo OP_AND = 10;
+immo OP_OR = 11;
+immo OP_XOR = 12;
+immo OP_NOT = 13;
+immo OP_SHL = 14;
+immo OP_SHR = 15;
+
+# Comparison
+immo OP_CMP = 16;
+
+# Control flow
+immo OP_JMP = 17;
+immo OP_JZ = 18;
+immo OP_JNZ = 19;
+immo OP_JE = 20;
+immo OP_JNE = 21;
+immo OP_JG = 22;
+immo OP_JGE = 23;
+immo OP_JL = 24;
+immo OP_JLE = 25;
+immo OP_CALL = 26;
+immo OP_RET = 27;
+
+# Function/IO
+immo OP_PRINT = 28;
+immo OP_PRINTS = 29;
+immo OP_READ = 30;
+
+# Memory (simple stack)
+immo OP_PUSH = 31;
+immo OP_POP = 32;
+immo OP_PEEK = 33;
+
+# String operations
+immo OP_STRIDX = 34;
+
+# ============================================================================
+# Code Generator State
+# ============================================================================
+
+av codegen_instructions = [];
+av codegen_strings = [];
+av codegen_register_counter = 0;
+av codegen_label_counter = 0;
+
+# ============================================================================
+# Instruction Creation Functions
+# ============================================================================
+
+feat codegen_add_instruction(op) {
+    manifest inst = forge(8);
+    inst[0] = op;
+    inst[1] = 0;
+    inst[2] = 0;
+    inst[3] = 0;
+    inst[4] = 0;
+    codegen_instructions.push(inst);
+    scale codegen_instructions.size() - 1;
+}
+
+feat codegen_add_instruction_r(op, rd) {
+    manifest inst = forge(8);
+    inst[0] = op;
+    inst[1] = rd;
+    inst[2] = 0;
+    inst[3] = 0;
+    inst[4] = 0;
+    codegen_instructions.push(inst);
+    scale codegen_instructions.size() - 1;
+}
+
+feat codegen_add_instruction_rr(op, rd, ra) {
+    manifest inst = forge(8);
+    inst[0] = op;
+    inst[1] = rd;
+    inst[2] = ra;
+    inst[3] = 0;
+    inst[4] = 0;
+    codegen_instructions.push(inst);
+    scale codegen_instructions.size() - 1;
+}
+
+feat codegen_add_instruction_rrr(op, rd, ra, rb) {
+    manifest inst = forge(8);
+    inst[0] = op;
+    inst[1] = rd;
+    inst[2] = ra;
+    inst[3] = rb;
+    inst[4] = 0;
+    codegen_instructions.push(inst);
+    scale codegen_instructions.size() - 1;
+}
+
+feat codegen_add_instruction_ri(op, rd, imm) {
+    manifest inst = forge(8);
+    inst[0] = op;
+    inst[1] = rd;
+    inst[2] = 0;
+    inst[3] = 0;
+    inst[4] = imm;
+    codegen_instructions.push(inst);
+    scale codegen_instructions.size() - 1;
+}
+
+feat codegen_add_instruction_rri(op, rd, ra, imm) {
+    manifest inst = forge(8);
+    inst[0] = op;
+    inst[1] = rd;
+    inst[2] = ra;
+    inst[3] = 0;
+    inst[4] = imm;
+    codegen_instructions.push(inst);
+    scale codegen_instructions.size() - 1;
+}
+
+# ============================================================================
+# String Management
+# ============================================================================
+
+feat codegen_add_string(str) {
+    codegen_strings.push(str);
+    scale codegen_strings.size() - 1;
+}
+
+feat codegen_get_string(index) {
+    scale codegen_strings[index];
+}
+
+# ============================================================================
+# Register Allocation
+# ============================================================================
+
+feat codegen_allocate_register() {
+    manifest reg = codegen_register_counter;
+    codegen_register_counter = codegen_register_counter + 1;
+    scale reg;
+}
+
+feat codegen_reset_registers() {
+    codegen_register_counter = 0;
+}
+
+# ============================================================================
+# Label Management
+# ============================================================================
+
+feat codegen_create_label() {
+    manifest label = codegen_label_counter;
+    codegen_label_counter = codegen_label_counter + 1;
+    scale label;
+}
+
+feat codegen_emit_label(label) {
+    manifest inst = forge(8);
+    inst[0] = -label;
+    inst[1] = 0;
+    inst[2] = 0;
+    inst[3] = 0;
+    inst[4] = 0;
+    codegen_instructions.push(inst);
+}
+
+# ============================================================================
+# AST Node Code Generation
+# ============================================================================
+
+feat codegen_generate_node(node) {
+    manifest kind = node[0];
+    verdict kind == NODE_LITERAL_EXPR {
+        scale codegen_generate_literal(node);
+    }
+    verdict kind == NODE_VARIABLE_EXPR {
+        scale codegen_generate_variable(node);
+    }
+    verdict kind == NODE_BINARY_EXPR {
+        scale codegen_generate_binary(node);
+    }
+    verdict kind == NODE_UNARY_EXPR {
+        scale codegen_generate_unary(node);
+    }
+    verdict kind == NODE_CALL_EXPR {
+        scale codegen_generate_call(node);
+    }
+    verdict kind == NODE_INDEX_EXPR {
+        scale codegen_generate_index(node);
+    }
+    verdict kind == NODE_EXPR_STMT {
+        scale codegen_generate_expr_stmt(node);
+    }
+    verdict kind == NODE_BLOCK_STMT {
+        scale codegen_generate_block(node);
+    }
+    verdict kind == NODE_IF_STMT {
+        scale codegen_generate_if(node);
+    }
+    verdict kind == NODE_WHILE_STMT {
+        scale codegen_generate_while(node);
+    }
+    verdict kind == NODE_FOR_STMT {
+        scale codegen_generate_for(node);
+    }
+    verdict kind == NODE_RETURN_STMT {
+        scale codegen_generate_return(node);
+    }
+    verdict kind == NODE_LET_STMT {
+        scale codegen_generate_let(node);
+    }
+    verdict kind == NODE_FN_STMT {
+        scale codegen_generate_function(node);
+    }
+    # Default: generate nop
+    scribe("Codegen Warning: Unknown node kind ");
+    scribe(kind);
+    scribe("\n");
+    codegen_add_instruction(OP_NOP);
+    scale -1;
+}
+
+# ============================================================================
+# Literal Expression Code Generation
+# ============================================================================
+
+feat codegen_generate_literal(node) {
+    manifest literal_type = node[6];
+    manifest value = node[7];
+    manifest rd = codegen_allocate_register();
+    verdict literal_type == LITERAL_INT {
+        codegen_add_instruction_ri(OP_MOVI, rd, value);
+    } faildict literal_type == LITERAL_FLOAT {
+        # For now, treat floats as ints;
+        codegen_add_instruction_ri(OP_MOVI, rd, value);
+    } faildict literal_type == LITERAL_STRING {
+        manifest str_idx = codegen_add_string(value);
+        codegen_add_instruction_ri(OP_MOVI, rd, str_idx);
+    } faildict literal_type == LITERAL_BOOL {
+        codegen_add_instruction_ri(OP_MOVI, rd, value);
+    } faildict literal_type == LITERAL_CHAR {
+        codegen_add_instruction_ri(OP_MOVI, rd, value);
+    } faildict literal_type == LITERAL_NONE {
+        codegen_add_instruction_ri(OP_MOVI, rd, 0);
+    } fail {
+        codegen_add_instruction_ri(OP_MOVI, rd, 0);
+    }
+    scale rd;
+}
+
+# ============================================================================
+# Variable Expression Code Generation
+# ============================================================================
+
+feat codegen_generate_variable(node) {
+    # For now, just allocate a register;
+    # TODO: Implement variable lookup;
+    manifest rd = codegen_allocate_register();
+    codegen_add_instruction_ri(OP_MOVI, rd, 0);
+    scale rd;
+}
+
+# ============================================================================
+# Binary Expression Code Generation
+# ============================================================================
+
+feat codegen_generate_binary(node) {
+    manifest op = node[6];
+    manifest left = node[7];
+    manifest right = node[8];
+    # Generate left operand;
+    manifest left_reg = codegen_generate_node(left);
+    # Generate right operand;
+    manifest right_reg = codegen_generate_node(right);
+    # Allocate result register;
+    manifest rd = codegen_allocate_register();
+    # Generate operation;
+    verdict op == TOKEN_PLUS {
+        codegen_add_instruction_rrr(OP_ADD, rd, left_reg, right_reg);
+    } faildict op == TOKEN_MINUS {
+        codegen_add_instruction_rrr(OP_SUB, rd, left_reg, right_reg);
+    } faildict op == TOKEN_STAR {
+        codegen_add_instruction_rrr(OP_MUL, rd, left_reg, right_reg);
+    } faildict op == TOKEN_SLASH {
+        codegen_add_instruction_rrr(OP_DIV, rd, left_reg, right_reg);
+    } faildict op == TOKEN_PERCENT {
+        codegen_add_instruction_rrr(OP_MOD, rd, left_reg, right_reg);
+    } faildict op == TOKEN_AND {
+        codegen_add_instruction_rrr(OP_AND, rd, left_reg, right_reg);
+    } faildict op == TOKEN_OR {
+        codegen_add_instruction_rrr(OP_OR, rd, left_reg, right_reg);
+    } faildict op == TOKEN_EQ {
+        codegen_add_instruction_rrr(OP_CMP, rd, left_reg, right_reg);
+    } faildict op == TOKEN_NEQ {
+        codegen_add_instruction_rrr(OP_CMP, rd, left_reg, right_reg);
+    } faildict op == TOKEN_LT {
+        codegen_add_instruction_rrr(OP_CMP, rd, left_reg, right_reg);
+    } faildict op == TOKEN_GT {
+        codegen_add_instruction_rrr(OP_CMP, rd, left_reg, right_reg);
+    } faildict op == TOKEN_LTE {
+        codegen_add_instruction_rrr(OP_CMP, rd, left_reg, right_reg);
+    } faildict op == TOKEN_GTE {
+        codegen_add_instruction_rrr(OP_CMP, rd, left_reg, right_reg);
+    } fail {
+        # Default: add;
+        codegen_add_instruction_rrr(OP_ADD, rd, left_reg, right_reg);
+    }
+    scale rd;
+}
+
+# ============================================================================
+# Unary Expression Code Generation
+# ============================================================================
+
+feat codegen_generate_unary(node) {
+    manifest op = node[6];
+    manifest operand = node[7];
+    # Generate operand;
+    manifest operand_reg = codegen_generate_node(operand);
+    # Allocate result register;
+    manifest rd = codegen_allocate_register();
+    # Generate operation;
+    verdict op == TOKEN_MINUS {
+        codegen_add_instruction_rr(OP_NEG, rd, operand_reg);
+    } faildict op == TOKEN_EXCLAIM {
+        codegen_add_instruction_rr(OP_NOT, rd, operand_reg);
+    } fail {
+        # Default: just move;
+        codegen_add_instruction_rr(OP_MOV, rd, operand_reg);
+    }
+    scale rd;
+}
+
+# ============================================================================
+# Call Expression Code Generation
+# ============================================================================
+
+feat codegen_generate_call(node) {
+    av callee = node[6];
+    av arg_count = node[7];
+
+    # Intrinsic optimization for scribe (string literal only)
+    verdict callee[0] == NODE_VARIABLE_EXPR {
+        av name = callee[6];
+        verdict name == "scribe" && arg_count == 1 {
+            av arg = node[8];
+            verdict arg[0] == NODE_LITERAL_EXPR && arg[6] == LITERAL_STRING {
+                av str_val = arg[7];
+                av str_idx = codegen_add_string(str_val);
+                # Emit OP_PRINTS (print string constant)
+                codegen_add_instruction_ri(OP_PRINTS, 0, str_idx);
+                scale 0;  # dummy result
+            } fail {
+                # Fallback to regular call for non-literal scribe
+                goto normal_call;
+            }
+        } fail {
+            goto normal_call;
+        }
+    } fail {
+        goto normal_call;
+    }
+
+    normal_call:
+    # Generate callee;
+    av callee_reg = codegen_generate_node(callee);
+    # Generate arguments;
+    av arg_regs = [];
+    av i = 0;
+    verdict i < arg_count {
+        av arg_node = node[8 + i];
+        av arg_reg = codegen_generate_node(arg_node);
+        arg_regs.push(arg_reg);
+        i = i + 1;
+    }
+    # Allocate result register;
+    av rd = codegen_allocate_register();
+    # Generate call instruction;
+    codegen_add_instruction_rr(OP_CALL, rd, callee_reg);
+    scale rd;
+}
+
+# ============================================================================
+# Index Expression Code Generation
+# ============================================================================
+
+feat codegen_generate_index(node) {
+    manifest object = node[6];
+    manifest index = node[7];
+    # Generate object;
+    manifest object_reg = codegen_generate_node(object);
+    # Generate index;
+    manifest index_reg = codegen_generate_node(index);
+    # Allocate result register;
+    manifest rd = codegen_allocate_register();
+    # Generate string index instruction;
+    codegen_add_instruction_rrr(OP_STRIDX, rd, object_reg, index_reg);
+    scale rd;
+}
+
+# ============================================================================
+# Expression Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_expr_stmt(node) {
+    manifest expr = node[6];
+    scale codegen_generate_node(expr);
+}
+
+# ============================================================================
+# Block Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_block(node) {
+    manifest stmt_count = node[6];
+    manifest last_reg = -1;
+    manifest i = 0;
+    verdict i < stmt_count {
+        manifest stmt = node[7 + i];
+        last_reg = codegen_generate_node(stmt);
+        i = i + 1;
+    }
+    scale last_reg;
+}
+
+# ============================================================================
+# If Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_if(node) {
+    # TODO: Implement if statement code generation;
+    codegen_add_instruction(OP_NOP);
+    scale -1;
+}
+
+# ============================================================================
+# While Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_while(node) {
+    # TODO: Implement while statement code generation;
+    codegen_add_instruction(OP_NOP);
+    scale -1;
+}
+
+# ============================================================================
+# For Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_for(node) {
+    # TODO: Implement for statement code generation;
+    codegen_add_instruction(OP_NOP);
+    scale -1;
+}
+
+# ============================================================================
+# Return Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_return(node) {
+    manifest value = node[6];
+    verdict value != -1 {
+        manifest value_reg = codegen_generate_node(value);
+        codegen_add_instruction_r(OP_RET, value_reg);
+    } fail {
+        codegen_add_instruction(OP_RET);
+    }
+    scale -1;
+}
+
+# ============================================================================
+# Let Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_let(node) {
+    manifest name = node[6];
+    manifest initializer = node[8];
+    verdict initializer != -1 {
+        manifest init_reg = codegen_generate_node(initializer);
+        # TODO: Store in variable table;
+        scale init_reg;
+    } fail {
+        # No initializer;
+        manifest rd = codegen_allocate_register();
+        codegen_add_instruction_ri(OP_MOVI, rd, 0);
+        scale rd;
+    }
+}
+
+# ============================================================================
+# Function Statement Code Generation
+# ============================================================================
+
+feat codegen_generate_function(node) {
+    # TODO: Implement function code generation;
+    codegen_add_instruction(OP_NOP);
+    scale -1;
+}
+
+# ============================================================================
+# Program Code Generation
+# ============================================================================
+
+feat codegen_generate_program(ast) {
+    # Reset state;
+    codegen_instructions = [];
+    codegen_strings = [];
+    codegen_register_counter = 0;
+    codegen_label_counter = 0;
+    # Generate code for AST;
+    manifest result_reg = codegen_generate_node(ast);
+    # Add halt instruction;
+    codegen_add_instruction(OP_HLT);
+    # Return program;
+    manifest program = forge(2);
+    program[0] = codegen_instructions;
+    program[1] = codegen_strings;
+    scale program;
+}
+
+# ============================================================================
+# Debug Functions
+# ============================================================================
+
+feat codegen_opcode_to_string(op) {
+    verdict op == OP_HLT { scale "HLT" }
+    verdict op == OP_NOP { scale "NOP" }
+    verdict op == OP_MOV { scale "MOV" }
+    verdict op == OP_MOVI { scale "MOVI" }
+    verdict op == OP_ADD { scale "ADD" }
+    verdict op == OP_SUB { scale "SUB" }
+    verdict op == OP_MUL { scale "MUL" }
+    verdict op == OP_DIV { scale "DIV" }
+    verdict op == OP_MOD { scale "MOD" }
+    verdict op == OP_NEG { scale "NEG" }
+    verdict op == OP_AND { scale "AND" }
+    verdict op == OP_OR { scale "OR" }
+    verdict op == OP_XOR { scale "XOR" }
+    verdict op == OP_NOT { scale "NOT" }
+    verdict op == OP_SHL { scale "SHL" }
+    verdict op == OP_SHR { scale "SHR" }
+    verdict op == OP_CMP { scale "CMP" }
+    verdict op == OP_JMP { scale "JMP" }
+    verdict op == OP_JZ { scale "JZ" }
+    verdict op == OP_JNZ { scale "JNZ" }
+    verdict op == OP_JE { scale "JE" }
+    verdict op == OP_JNE { scale "JNE" }
+    verdict op == OP_JG { scale "JG" }
+    verdict op == OP_JGE { scale "JGE" }
+    verdict op == OP_JL { scale "JL" }
+    verdict op == OP_JLE { scale "JLE" }
+    verdict op == OP_CALL { scale "CALL" }
+    verdict op == OP_RET { scale "RET" }
+    verdict op == OP_PRINT { scale "PRINT" }
+    verdict op == OP_PRINTS { scale "PRINTS" }
+    verdict op == OP_READ { scale "READ" }
+    verdict op == OP_PUSH { scale "PUSH" }
+    verdict op == OP_POP { scale "POP" }
+    verdict op == OP_PEEK { scale "PEEK" }
+    verdict op == OP_STRIDX { scale "STRIDX" }
+    scale "INVALID";
+}
+
+feat codegen_print_program(program) {
+    scribe("=== Generated Program ===\n");
+    scribe("Instructions: ");
+    scribe(program.instructions.size());
+    scribe("\n");
+    scribe("Strings: ");
+    scribe(program.strings.size());
+    scribe("\n\n");
+    manifest i = 0;
+    verdict i < program.instructions.size() {
+        manifest inst = program.instructions[i];
+        manifest op = inst[0];
+        scribe("[");
+        scribe(i);
+        scribe("] ");
+        scribe(codegen_opcode_to_string(op));
+        scribe("\n");
+        i = i + 1;
+    }
+    scribe("\n=== Strings ===\n");
+    i = 0;
+    verdict i < program.strings.size() {
+        scribe("[");
+        scribe(i);
+        scribe("] ");
+        scribe(program.strings[i]);
+        scribe("\n");
+        i = i + 1;
+    }
+}

@@ -1,0 +1,13 @@
+VeldoCra Compiler v0.0.1
+Processing tests/simple_test.vel...
+[Ownership] DEBUG: Entered check function
+[Ownership] DEBUG: Entered walk_node
+[Ownership] DEBUG: Entered walk_node
+[OWNERSHIP SUCCESS] Manifested x with the Ownership Checker ACTIVE.
+[Ownership] DEBUG: Entered walk_node
+[Ownership] DEBUG: Entered walk_node
+[OWNERSHIP SUCCESS] Manifested y with the Ownership Checker ACTIVE.
+[Ownership] DEBUG: Entered walk_node
+Executing...
+
+Success.

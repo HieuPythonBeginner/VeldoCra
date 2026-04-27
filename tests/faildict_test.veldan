@@ -1,0 +1,8 @@
+av x = 7;
+verdict x > 10 {
+    scribe("big");
+} faildict x > 5 {
+    scribe("medium");
+} fail {
+    scribe("small");
+}

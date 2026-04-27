@@ -1,0 +1,38 @@
+{
+  "comments": {
+    "lineComment": ["#", "//", "cmt"],
+    "blockComment": ["/*", "*/", ["mul_cmt {", "}"]]
+  },
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"]
+  ],
+  "autoClosingPairs": [
+    { "open": "{", "close": "}" },
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"" },
+    { "open": "'", "close": "'" }
+  ],
+  "surroundingPairs": [
+    { "open": "{", "close": "}" },
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"" },
+    { "open": "'", "close": "'" }
+  ],
+  "indentationRules": {
+    "increaseIndentPattern": ".*(->|:|\\{|\\b(verdict|fail|path|analysis|cycle|sustain|samsara)\\b.*)$",
+    "decreaseIndentPattern": "^\\s*(\\}|\\]|\\)|:|\\b(fail|end|skip)\\b.*$)"
+  },
+  "folding": {
+    "markers": {
+      "start": "^\\s*#|\\{",
+      "end": "^\\s*\\}|\\}"
+    }
+  },
+  "wordPattern": "(-?\\d*\\.\\d+)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\-\\+\\=\\[\\]\\{\\}\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>/\\?]+)",
+  "tabSize": 4,
+  "insertSpaces": true
+}

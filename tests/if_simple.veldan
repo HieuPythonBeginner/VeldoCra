@@ -1,0 +1,6 @@
+av y = 5;
+verdict y > 3 {
+    flow "yes";
+} fail {
+    flow "no";
+}

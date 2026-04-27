@@ -1,0 +1,39 @@
+# Test Pattern Matching with 'analysis' keyword
+# This file tests the newly implemented pattern matching feature
+
+feat main() {
+    # Test 1: Basic literal pattern
+    av x = 1;
+    analysis x {
+        0 => scribe("zero"),
+        1 => scribe("one"),
+        2 => scribe("two"),
+        _ => scribe("other")
+    }
+
+    # Test 2: String pattern
+    av name = "Alice";
+    analysis name {
+        "Alice" => scribe("Hello Alice!"),
+        "Bob" => scribe("Hello Bob!"),
+        _ => scribe("Hello stranger!")
+    }
+
+    # Test 3: Wildcard pattern
+    av status = 404;
+    analysis status {
+        200 => scribe("OK"),
+        404 => scribe("Not Found"),
+        _ => scribe("Error")
+    }
+
+    # Test 4: With guard clause
+    av age = 25;
+    analysis age {
+        n if n < 18 => scribe("Minor"),
+        n if n < 65 => scribe("Adult"),
+        _ => scribe("Senior")
+    }
+
+    scale 0;
+}

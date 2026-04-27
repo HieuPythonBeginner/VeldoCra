@@ -1,0 +1,40 @@
+[DEBUG] About to run lexer...
+[LEXER] First token type: 76
+[LEXER] After pushing [2 tokens], next token type: 5
+[LEXER] After pushing [3 tokens], next token type: 119
+[LEXER] After pushing [4 tokens], next token type: 6
+[LEXER] After pushing [5 tokens], next token type: 116
+[LEXER] After pushing [6 tokens], next token type: 2
+[LEXER] After newline, token type: 76
+[LEXER] After pushing [8 tokens], next token type: 5
+[LEXER] After pushing [9 tokens], next token type: 119
+[LEXER] After pushing [10 tokens], next token type: 6
+[LEXER] After pushing [11 tokens], next token type: 116
+[LEXER] After pushing [12 tokens], next token type: 2
+[LEXER] After newline, token type: 2
+[LEXER] After newline, token type: 2
+[LEXER] After newline, token type: 0
+[DEBUG] Lexer done, token count = 17
+[DEBUG] About to run parser...
+[PARSER] parse_program: initial token type = 76
+[PARSER] parse_statement: token type = 76
+[PARSER] parse_simple_statement: current token type = 76 text = 'manifest'
+[PARSER] parse_manifest_statement: starting
+[PARSER] parse_manifest_statement: after advance, current token type = 5
+[PARSER] parse_manifest_statement: variable name = [5] = x
+[PARSER] parse_manifest_statement: found '='
+[PARSER] parse_manifest_statement: found ';'
+[PARSER] parse_manifest_statement: result = 0x7feab0ed1088
+[PARSER] parse_statement: token type = 76
+[PARSER] parse_simple_statement: current token type = 76 text = 'manifest'
+[PARSER] parse_manifest_statement: starting
+[PARSER] parse_manifest_statement: after advance, current token type = 5
+[PARSER] parse_manifest_statement: variable name = [5] = y
+[PARSER] parse_manifest_statement: found '='
+[PARSER] parse_manifest_statement: found ';'
+[PARSER] parse_manifest_statement: result = 0x7feab0ed1130
+[PARSER] Statement parse returned nullptr, advancing to prevent infinite loop
+[PARSER] Returning block: 0x7feab0ed1010 kind=13
+[DEBUG] Parser done, ast_root = 0x7feab0ed1010
+[DEBUG] About to run ownership check...
+[CodeGen] Warning: Unsupported node kind 13

@@ -1,0 +1,30 @@
+// Test hybrid block syntax: mixing {} and indentation
+
+feat main() {
+    // {} block outer
+    av x = 10;
+    
+    // if with {} body
+    if x > 5 {
+        av y = 20;
+        ego.print(y);
+    }
+    
+    // for with indent body (hybrid: outer {}, inner indent)
+    // Syntax: for i : expr
+    for i : 0
+        av z = i * 2;
+    
+    // while with {} body
+    while x > 0 {
+        x = x - 1;
+    }
+    
+    // nested hybrid: if with indent, containing for with {}
+    if x == 0
+        for j : 5 {
+            ego.print(j);
+        }
+    
+    scale 0;
+}

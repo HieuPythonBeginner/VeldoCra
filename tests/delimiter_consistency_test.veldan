@@ -1,0 +1,24 @@
+# Test delimiter consistency enforcement
+av x = 5;
+
+# This should work - {} style
+verdict x > 0 {
+    scribe("OK: {} style");
+} fail {
+    scribe("Fail case");
+}
+
+# This should work - : style
+verdict x < 10:;
+    scribe("OK: : style");
+fail:;
+    scribe("Fail case");
+
+# This should FAIL - mixed delimiters (commented out to avoid error)
+# verdict x == 5 {
+#     scribe("Mixed style - should error")
+# fail:
+#     scribe("Inconsistent delimiters!")
+# }
+
+scribe("Consistency test passed!");

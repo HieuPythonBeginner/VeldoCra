@@ -1,0 +1,6 @@
+feat identity<T>(x: T) {
+    scale x;
+}
+
+flow identity(42);
+flow identity("hello");

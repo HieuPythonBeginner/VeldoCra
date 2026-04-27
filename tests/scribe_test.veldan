@@ -1,0 +1,4 @@
+av x = 42;
+scribe("Hello VeldoCra!");
+scribe(x);
+scribe("Done!");

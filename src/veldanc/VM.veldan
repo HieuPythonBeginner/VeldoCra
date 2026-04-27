@@ -1,0 +1,243 @@
+// VM.vel - Virtual Machine for VeldoCra bytecode execution
+
+// Opcodes (register-based)
+immo OP_HLT = 0;
+immo OP_NOP = 1;
+immo OP_MOV = 2;
+immo OP_MOVI = 3;
+immo OP_ADD = 4;
+immo OP_SUB = 5;
+immo OP_MUL = 6;
+immo OP_DIV = 7;
+immo OP_MOD = 8;
+immo OP_NEG = 9;
+immo OP_AND = 10;
+immo OP_OR = 11;
+immo OP_XOR = 12;
+immo OP_NOT = 13;
+immo OP_SHL = 14;
+immo OP_SHR = 15;
+immo OP_CMP = 16;
+immo OP_JMP = 17;
+immo OP_JZ = 18;
+immo OP_JNZ = 19;
+immo OP_JE = 20;
+immo OP_JNE = 21;
+immo OP_JG = 22;
+immo OP_JGE = 23;
+immo OP_JL = 24;
+immo OP_JLE = 25;
+immo OP_CALL = 26;
+immo OP_RET = 27;
+immo OP_PRINT = 28;
+immo OP_PRINTS = 29;
+immo OP_READ = 30;
+immo OP_PUSH = 31;
+immo OP_POP = 32;
+immo OP_PEEK = 33;
+immo OP_STRIDX = 34;
+
+// Registers
+immo R0 = 0;
+immo R1 = 1;
+immo R2 = 2;
+immo R3 = 3;
+immo R4 = 4;
+immo R5 = 5;
+immo R6 = 6;
+immo R7 = 7;
+immo R8 = 8;
+immo R9 = 9;
+immo R10 = 10;
+immo R11 = 11;
+immo R12 = 12;
+immo R13 = 13;
+immo R14 = 14;
+immo R15 = 15;
+immo IP = 16;
+immo SP = 17;
+immo BP = 18;
+immo FLAGS = 19;
+immo REG_COUNT = 20;
+
+// Value types
+immo TYPE_NONE = 0;
+immo TYPE_INT = 1;
+immo TYPE_FLOAT = 2;
+immo TYPE_BOOL = 3;
+immo TYPE_STRING = 4;
+
+// VM Value
+race Value {
+    core.type;
+    core.int_val;
+    core.float_val;
+    core.bool_val;
+    core.str_val;
+}
+
+// VM State
+race VM {
+    core.registers;  ;// array of Value (20 registers)
+    core.stack;      ;// vector of Value
+    core.ip;         ;// int (instruction pointer)
+    core.code;       ;// vector of instruction arrays
+    core.strings;    ;// vector of string
+    core.flags;      ;// comparison flags
+}
+
+// Create VM
+feat new_vm(instructions, strings) {
+    manifest vm = forge(32);
+    core.registers(vm) = vec();
+    av i = 0;
+    sustain i < REG_COUNT {
+        push(core.registers(vm), Value());
+        i = i + 1;
+    }
+    core.stack(vm) = vec();
+    core.ip(vm) = 0;
+    core.code(vm) = instructions;
+    core.strings(vm) = strings;
+    core.flags(vm) = 0;  ;// flags: bit 0 = zero, bit 1 = negative, etc.
+    scale vm;
+}
+
+// Get register value
+feat get_reg(vm, reg) {
+    scale core.registers(vm)[reg];
+}
+
+// Set register value
+feat set_reg(vm, reg, value) {
+    core.registers(vm)[reg] = value;
+}
+
+// Push to stack
+feat push_stack(vm, value) {
+    push(core.stack(vm), value);
+}
+
+// Pop from stack
+feat pop_stack(vm) {
+    verdict len(core.stack(vm)) == 0 {
+        scribe("Stack underflow\n");
+        scale Value();
+    }
+    av val = core.stack(vm)[len(core.stack(vm)) - 1];
+    pop(core.stack(vm));
+    scale val;
+}
+
+// Execute instruction
+feat execute(vm, inst) {
+    av op = inst[0];
+    av rd = inst[1];
+    av ra = inst[2];
+    av rb = inst[3];
+    av imm = (inst[4] | (inst[5] << 8) | (inst[6] << 16) | (inst[7] << 24));
+    verdict op == OP_HLT {
+        ;// Halt execution
+        scale false;
+    } faildict op == OP_NOP {
+        ;// No operation
+    } faildict op == OP_MOV {
+        set_reg(vm, rd, get_reg(vm, ra));
+    } faildict op == OP_MOVI {
+        av val = Value();
+        core.type(val) = TYPE_INT;
+        core.int_val(val) = imm;
+        set_reg(vm, rd, val);
+    } faildict op == OP_ADD {
+        av a = get_reg(vm, ra).int_val;
+        av b = get_reg(vm, rb).int_val;
+        av result = Value();
+        core.type(result) = TYPE_INT;
+        core.int_val(result) = a + b;
+        set_reg(vm, rd, result);
+    } faildict op == OP_SUB {
+        av a = get_reg(vm, ra).int_val;
+        av b = get_reg(vm, rb).int_val;
+        av result = Value();
+        core.type(result) = TYPE_INT;
+        core.int_val(result) = a - b;
+        set_reg(vm, rd, result);
+    } faildict op == OP_MUL {
+        av a = get_reg(vm, ra).int_val;
+        av b = get_reg(vm, rb).int_val;
+        av result = Value();
+        core.type(result) = TYPE_INT;
+        core.int_val(result) = a * b;
+        set_reg(vm, rd, result);
+    } faildict op == OP_DIV {
+        av a = get_reg(vm, ra).int_val;
+        av b = get_reg(vm, rb).int_val;
+        verdict b == 0 {
+            scribe("Division by zero\n");
+            scale false;
+        }
+        av result = Value();
+        core.type(result) = TYPE_INT;
+        core.int_val(result) = a / b;
+        set_reg(vm, rd, result);
+    } faildict op == OP_NEG {
+        av a = get_reg(vm, ra).int_val;
+        av result = Value();
+        core.type(result) = TYPE_INT;
+        core.int_val(result) = -a;
+        set_reg(vm, rd, result);
+    } faildict op == OP_PRINT {
+        av val = get_reg(vm, rd);
+        verdict core.type(val) == TYPE_INT {
+            scribe(core.int_val(val));
+        }
+        scribe("\n");
+    } faildict op == OP_PRINTS {
+        verdict imm < len(core.strings(vm)) {
+            scribe(core.strings(vm)[imm]);
+        }
+    } faildict op == OP_PUSH {
+        push_stack(vm, get_reg(vm, rd));
+    } faildict op == OP_POP {
+        set_reg(vm, rd, pop_stack(vm));
+    } faildict op == OP_PEEK {
+        verdict len(core.stack(vm)) > 0 {
+            set_reg(vm, rd, core.stack(vm)[len(core.stack(vm)) - 1]);
+        }
+    } faildict op == OP_STRIDX {
+        av str_val = get_reg(vm, ra);
+        av idx = get_reg(vm, rb).int_val;
+        verdict core.type(str_val) == TYPE_STRING && idx >= 0 && idx < len(core.str_val(str_val)) {
+            av char_val = Value();
+            core.type(char_val) = TYPE_INT;
+            core.int_val(char_val) = core.str_val(str_val)[idx];
+            set_reg(vm, rd, char_val);
+        }
+    } fail {
+        scribe("Unknown opcode: ");
+        scribe(op);
+        scribe("\n");
+        scale false;
+    }
+    scale true;
+}
+
+// Run VM
+feat run(vm) {
+    sustain core.ip(vm) < len(core.code(vm)) {
+        av inst = core.code(vm)[core.ip(vm)];
+        verdict execute(vm, inst) {
+            core.ip(vm) = core.ip(vm) + 1;
+        } fail {
+            scale;
+        }
+    }
+}
+
+// Interpret program
+feat interpret(program) {
+    av instructions = program[0];
+    av strings = program[1];
+    av vm = new_vm(instructions, strings);
+    run(vm);
+}

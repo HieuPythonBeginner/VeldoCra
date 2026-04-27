@@ -1,0 +1,462 @@
+# VeldoCra Self-Host Parser - Recursive Descent
+# Phase 12: Parser for self-hosted compiler
+# Based on C++ parser implementation in src/frontend/parser/parser.cpp
+
+# ============================================================================
+# Parser State
+# ============================================================================
+
+# Token stream (array of tokens)
+av parser_tokens = [];
+av parser_current = 0;
+av parser_error_count = 0;
+
+# ============================================================================
+# Token Access Functions
+# ============================================================================
+
+feat parser_current_token() {
+    verdict parser_current < parser_tokens.size() {
+        scale parser_tokens[parser_current];
+    }
+    scale [TOKEN_EOF, 0, 0, 0, 0, 0]  # EOF token;
+}
+
+feat parser_peek_token(offset) {
+    av idx = parser_current + offset;
+    verdict idx < parser_tokens.size() {
+        scale parser_tokens[idx];
+    }
+    scale [TOKEN_EOF, 0, 0, 0, 0, 0]  # EOF token;
+}
+
+feat parser_is_at_end() {
+    scale parser_current_token()[0] == TOKEN_EOF;
+}
+
+feat parser_advance() {
+    parser_current = parser_current + 1;
+    # Skip newlines;
+    verdict parser_current_token()[0] == TOKEN_NEWLINE {
+        parser_current = parser_current + 1;
+    }
+}
+
+feat parser_check(type) {
+    scale parser_current_token()[0] == type;
+}
+
+feat parser_match(type) {
+    verdict parser_check(type) {
+        parser_advance();
+        scale true;
+    }
+    scale false;
+}
+
+feat parser_expect(type, message) {
+    verdict parser_check(type) {
+        parser_advance();
+        scale true;
+    }
+    parser_error_count = parser_error_count + 1;
+    scribe("Parse Error: ");
+    scribe(message);
+    scribe("\n");
+    scale false;
+}
+
+# ============================================================================
+# Parser Initialization
+# ============================================================================
+
+feat parser_init(tokens) {
+    parser_tokens = tokens;
+    parser_current = 0;
+    parser_error_count = 0;
+}
+
+# ============================================================================
+# Expression Parsing
+# ============================================================================
+
+feat parser_parse_expression() {
+    scale parser_parse_assignment();
+}
+
+feat parser_parse_assignment() {
+    av expr = parser_parse_or();
+    verdict parser_check(TOKEN_ASSIGN) || parser_check(TOKEN_PLUS_ASSIGN) ||
+            parser_check(TOKEN_MINUS_ASSIGN) || parser_check(TOKEN_STAR_ASSIGN) ||
+            parser_check(TOKEN_SLASH_ASSIGN) || parser_check(TOKEN_COLON_ASSIGN) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av value = parser_parse_assignment();
+        # TODO: Create assignment expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_or() {
+    av expr = parser_parse_and();
+    verdict parser_check(TOKEN_OR) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_and();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_and() {
+    av expr = parser_parse_equality();
+    verdict parser_check(TOKEN_AND) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_equality();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_equality() {
+    av expr = parser_parse_comparison();
+    verdict parser_check(TOKEN_EQ) || parser_check(TOKEN_NEQ) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_comparison();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_comparison() {
+    av expr = parser_parse_shift();
+    verdict parser_check(TOKEN_LT) || parser_check(TOKEN_GT) ||
+            parser_check(TOKEN_LTE) || parser_check(TOKEN_GTE) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_shift();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_shift() {
+    av expr = parser_parse_addition();
+    verdict parser_check(TOKEN_LSHIFT) || parser_check(TOKEN_RSHIFT) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_addition();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_addition() {
+    av expr = parser_parse_multiplication();
+    verdict parser_check(TOKEN_PLUS) || parser_check(TOKEN_MINUS) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_multiplication();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_multiplication() {
+    av expr = parser_parse_unary();
+    verdict parser_check(TOKEN_STAR) || parser_check(TOKEN_SLASH) || parser_check(TOKEN_PERCENT) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av right = parser_parse_unary();
+        # TODO: Create binary expression;
+        scale expr;
+    }
+    scale expr;
+}
+
+feat parser_parse_unary() {
+    verdict parser_check(TOKEN_MINUS) || parser_check(TOKEN_EXCLAIM) || parser_check(TOKEN_TILDE) {
+        av op = parser_current_token()[0];
+        parser_advance();
+        av operand = parser_parse_unary();
+        # TODO: Create unary expression;
+        scale operand;
+    }
+    scale parser_parse_postfix();
+}
+
+feat parser_parse_postfix() {
+    av expr = parser_parse_primary();
+    # Loop for postfix operations;
+    av done = false;
+    verdict !done {
+        verdict parser_check(TOKEN_PAREN_OPEN) {
+            # Function call;
+            expr = parser_parse_call(expr);
+        } faildict parser_check(TOKEN_DOT) {
+            # Member access;
+            parser_advance();
+            verdict parser_check(TOKEN_IDENT) {
+                av member = parser_current_token()[6]  # token text;
+                parser_advance();
+                # TODO: Create member expression;
+            }
+        } faildict parser_check(TOKEN_BRACKET_OPEN) {
+            # Index expression;
+            parser_advance();
+            av index = parser_parse_expression();
+            parser_expect(TOKEN_BRACKET_CLOSE, "Expected ']' after index");
+            # TODO: Create index expression;
+            expr = create_index_expr(0, 0, 0, 0, expr, index);
+        } fail {
+            done = true;
+        }
+    }
+    scale expr;
+}
+
+feat parser_parse_call(callee) {
+    parser_advance()  # consume '(';
+    av call = create_call_expr(0, 0, 0, 0, callee);
+    verdict !parser_check(TOKEN_PAREN_CLOSE) && !parser_is_at_end() {
+        av arg = parser_parse_expression();
+        add_call_argument(call, arg);
+        verdict parser_check(TOKEN_COMMA) {
+            parser_advance();
+        }
+    }
+    parser_expect(TOKEN_PAREN_CLOSE, "Expected ')' after arguments");
+    scale call;
+}
+
+feat parser_parse_primary() {
+    # Literals
+    verdict parser_check(TOKEN_INTEGER) || parser_check(TOKEN_FLOAT) ||
+            parser_check(TOKEN_STRING) || parser_check(TOKEN_CHAR) ||
+            parser_check(TOKEN_BOOLEAN) || parser_check(TOKEN_KW_TRUE) ||
+            parser_check(TOKEN_KW_FALSE) || parser_check(TOKEN_KW_NONE) {
+        scale parser_parse_literal();
+    }
+    # Parenthesized expression
+    verdict parser_check(TOKEN_PAREN_OPEN) {
+        parser_advance();
+        av expr = parser_parse_expression();
+        parser_expect(TOKEN_PAREN_CLOSE, "Expected ')' after expression");
+        scale expr;
+    }
+    # Identifier
+    verdict parser_check(TOKEN_IDENT) {
+        av name = parser_current_token()[6]  # token text
+        parser_advance();
+        scale create_variable_expr(0, 0, 0, 0, name);
+    }
+    # Print/Scribe builtin functions
+    verdict parser_check(TOKEN_KW_PRINT) {
+        parser_advance();
+        scale create_variable_expr(0, 0, 0, 0, "print");
+    }
+    verdict parser_check(TOKEN_KW_SCRIBE) {
+        parser_advance();
+        scale create_variable_expr(0, 0, 0, 0, "scribe");
+    }
+    # Default: error
+    scribe("Parse Error: Unexpected token\n");
+    parser_error_count = parser_error_count + 1;
+    scale create_literal_expr(0, 0, 0, 0, LITERAL_NONE, 0);
+}
+        # TODO: Handle print without parens
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_NONE, 0);
+    }
+    # Default: error
+    scribe("Parse Error: Unexpected token\n");
+    parser_error_count = parser_error_count + 1;
+    scale create_literal_expr(0, 0, 0, 0, LITERAL_NONE, 0);
+}
+
+feat parser_parse_literal() {
+    av token = parser_current_token();
+    av token_type = token[0];
+    verdict token_type == TOKEN_INTEGER {
+        av value = token[6]  # token value;
+        parser_advance();
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_INT, value);
+    }
+    verdict token_type == TOKEN_FLOAT {
+        av value = token[6]  # token value;
+        parser_advance();
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_FLOAT, value);
+    }
+    verdict token_type == TOKEN_STRING {
+        av value = token[6]  # token value;
+        parser_advance();
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_STRING, value);
+    }
+    verdict token_type == TOKEN_CHAR {
+        av value = token[6]  # token value;
+        parser_advance();
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_CHAR, value);
+    }
+    verdict token_type == TOKEN_BOOLEAN || token_type == TOKEN_KW_TRUE || token_type == TOKEN_KW_FALSE {
+        av value = token[6]  # token value;
+        parser_advance();
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_BOOL, value);
+    }
+    verdict token_type == TOKEN_KW_NONE {
+        parser_advance();
+        scale create_literal_expr(0, 0, 0, 0, LITERAL_NONE, 0);
+    }
+    # Default: return none literal;
+    scale create_literal_expr(0, 0, 0, 0, LITERAL_NONE, 0);
+}
+
+# ============================================================================
+# Statement Parsing
+# ============================================================================
+
+feat parser_parse_statement() {
+    # Skip newlines;
+    verdict parser_check(TOKEN_NEWLINE) {
+        parser_advance();
+    }
+    # Check for different statement types;
+    verdict parser_check(TOKEN_KW_VERDICT) || parser_check(TOKEN_KW_IF) {
+        scale parser_parse_if_statement();
+    }
+    verdict parser_check(TOKEN_KW_SUSTAIN) || parser_check(TOKEN_KW_WHILE) {
+        scale parser_parse_while_statement();
+    }
+    verdict parser_check(TOKEN_KW_CYCLE) || parser_check(TOKEN_KW_FOR) {
+        scale parser_parse_for_statement();
+    }
+    verdict parser_check(TOKEN_KW_SCALE) || parser_check(TOKEN_KW_RETURN) {
+        scale parser_parse_return_statement();
+    }
+    verdict parser_check(TOKEN_KW_END) || parser_check(TOKEN_KW_BREAK) {
+        parser_advance();
+        scale create_node(NODE_BREAK_STMT, 0, 0, 0, 0);
+    }
+    verdict parser_check(TOKEN_KW_SKIP) || parser_check(TOKEN_KW_CONTINUE) {
+        parser_advance();
+        scale create_node(NODE_CONTINUE_STMT, 0, 0, 0, 0);
+    }
+    verdict parser_check(TOKEN_KW_FEAT) || parser_check(TOKEN_KW_ABILITY) || parser_check(TOKEN_KW_HAX) {
+        scale parser_parse_function_statement();
+    }
+    verdict parser_check(TOKEN_KW_LIMIT) || parser_check(TOKEN_KW_LET) {
+        scale parser_parse_let_statement();
+    }
+    verdict parser_check(TOKEN_KW_IMMO) || parser_check(TOKEN_KW_CONST) {
+        scale parser_parse_const_statement();
+    }
+    # Default: expression statement;
+    scale parser_parse_expression_statement();
+}
+
+feat parser_parse_if_statement() {
+    # TODO: Implement if statement parsing;
+    scale create_node(NODE_IF_STMT, 0, 0, 0, 0);
+}
+
+feat parser_parse_while_statement() {
+    # TODO: Implement while statement parsing;
+    scale create_node(NODE_WHILE_STMT, 0, 0, 0, 0);
+}
+
+feat parser_parse_for_statement() {
+    # TODO: Implement for statement parsing;
+    scale create_node(NODE_FOR_STMT, 0, 0, 0, 0);
+}
+
+feat parser_parse_return_statement() {
+    parser_advance()  # consume 'scale' or 'return';
+    av value = -1;
+    verdict !parser_check(TOKEN_NEWLINE) && !parser_is_at_end() && !parser_check(TOKEN_SEMICOLON) {
+        value = parser_parse_expression();
+    }
+    scale create_return_stmt(0, 0, 0, 0, value);
+}
+
+feat parser_parse_function_statement() {
+    # TODO: Implement function statement parsing;
+    scale create_node(NODE_FN_STMT, 0, 0, 0, 0);
+}
+
+feat parser_parse_let_statement() {
+    parser_advance()  # consume 'limit' or 'let';
+    av name = parser_current_token()[6]  # variable name;
+    parser_advance();
+    av type_expr = -1;
+    av initializer = -1;
+    verdict parser_check(TOKEN_COLON) {
+        parser_advance();
+        type_expr = parser_parse_expression();
+    }
+    verdict parser_check(TOKEN_ASSIGN) {
+        parser_advance();
+        initializer = parser_parse_expression();
+    }
+    scale create_let_stmt(0, 0, 0, 0, name, type_expr, initializer, 0);
+}
+
+feat parser_parse_const_statement() {
+    parser_advance()  # consume 'immo' or 'const';
+    av name = parser_current_token()[6]  # variable name;
+    parser_advance();
+    av type_expr = -1;
+    av initializer = -1;
+    verdict parser_check(TOKEN_COLON) {
+        parser_advance();
+        type_expr = parser_parse_expression();
+    }
+    verdict parser_check(TOKEN_ASSIGN) {
+        parser_advance();
+        initializer = parser_parse_expression();
+    }
+    scale create_let_stmt(0, 0, 0, 0, name, type_expr, initializer, 0);
+}
+
+feat parser_parse_expression_statement() {
+    av expr = parser_parse_expression();
+    scale create_expr_stmt(0, 0, 0, 0, expr);
+}
+
+# ============================================================================
+# Program Parsing
+# ============================================================================
+
+feat parser_parse_program() {
+    av block = create_block_stmt(0, 0, 0, 0);
+    verdict !parser_is_at_end() {
+        av stmt = parser_parse_statement();
+        add_block_statement(block, stmt);
+        # Skip optional semicolons and newlines;
+        verdict parser_check(TOKEN_SEMICOLON) || parser_check(TOKEN_NEWLINE) {
+            parser_advance();
+        }
+    }
+    scale block;
+}
+
+# ============================================================================
+# Main Parse Function
+# ============================================================================
+
+feat parser_parse(tokens) {
+    parser_init(tokens);
+    av ast = parser_parse_program();
+    verdict parser_error_count > 0 {
+        scribe("Parse errors: ");
+        scribe(parser_error_count);
+        scribe("\n");
+    }
+    scale ast;
+}

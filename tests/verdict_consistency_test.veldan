@@ -1,0 +1,17 @@
+# Test verdict/fail with consistent delimiters
+av x = 5;
+
+# Test {} style
+verdict x > 0 {
+    scribe("x > 0");
+} fail {
+    scribe("x <= 0");
+}
+
+# Test : style
+verdict x < 10:;
+    scribe("x < 10");
+fail:;
+    scribe("x >= 10");
+
+scribe("Test completed!");

@@ -1,0 +1,352 @@
+# ============================================================================
+# Veldenava Standard Library - Self-Host Implementation
+# Soul/Magic Theme Naming
+# ============================================================================
+
+# ============================================================================
+# 📦 Collections - The Nexus System
+# ============================================================================
+
+# Sequence (Vector/Array) - like Vec/Array
+race Sequence {
+    core.data;
+}
+
+feat Sequence() {
+    manifest s = manifest(2);  # Use manifest keyword for allocation
+    core.data(s) = [];
+    scale s;
+}
+
+feat seq_push(seq, item) {
+    core.data(seq).push(item);
+}
+
+feat seq_pop(seq) {
+    scale core.data(seq).pop();
+}
+
+feat seq_extent(seq) {
+    scale core.data(seq).extent();
+}
+
+feat seq_peek(seq, index) {
+    scale core.data(seq)[index];
+}
+
+feat seq_mutate(seq, index, new_val) {
+    core.data(seq)[index] = new_val;
+}
+
+feat seq_graft(seq, index, item) {
+    core.data(seq).graft(index, item);
+}
+
+# Registry (Map/Dict)
+race Registry {
+    core.data;
+}
+
+feat Registry() {
+    manifest r = forge(2);
+    core.data(r) = {};
+    scale r;
+}
+
+feat reg_bind(reg, key, value) {
+    core.data(reg)[key] = value;
+}
+
+feat reg_fetch(reg, key) {
+    scale core.data(reg)[key];
+}
+
+feat reg_exists(reg, key) {
+    scale core.data(reg).has_key(key);
+}
+
+feat reg_sever(reg, key) {
+    core.data(reg).sever(key);
+}
+
+feat reg_extent(reg) {
+    scale core.data(reg).keys().extent();
+}
+
+# Collective (Set)
+race Collective {
+    core.data;
+}
+
+feat Collective() {
+    manifest c = forge(2);
+    core.data(c) = [];
+    scale c;
+}
+
+feat coll_enroll(coll, item) {
+    verdict !coll_has(coll, item) {
+        core.data(coll).push(item);
+    }
+}
+
+feat coll_dismiss(coll, item) {
+    core.data(coll).sever(item);
+}
+
+feat coll_has(coll, item) {
+    manifest found = false;
+    manifest i = 0;
+    verdict i < core.data(coll).extent() {
+        verdict core.data(coll)[i] == item {
+            found = true;
+        }
+        i = i + 1;
+    }
+    scale found;
+}
+
+feat coll_merge(coll, other) {
+    manifest i = 0;
+    verdict i < core.data(other).extent() {
+        coll_enroll(coll, core.data(other)[i]);
+        i = i + 1;
+    }
+}
+
+feat coll_mesh(coll, other) {
+    manifest result = Collective();
+    manifest i = 0;
+    verdict i < core.data(coll).extent() {
+        verdict coll_has(other, core.data(coll)[i]) {
+            coll_enroll(result, core.data(coll)[i]);
+        }
+        i = i + 1;
+    }
+    core.data(coll) = core.data(result);
+}
+
+feat coll_extent(coll) {
+    scale core.data(coll).extent();
+}
+
+feat coll_clear(coll) {
+    core.data(coll) = [];
+}
+
+# ============================================================================
+# 📥 I/O - The Echo System
+# ============================================================================
+
+# ============================================================================
+# 📥 I/O - The Echo System
+# ============================================================================
+# NOTE: scribe and emit are BUILTIN INTRINSICS (not defined here)
+# They are optimized directly by the compiler to OP_PRINTS/OP_PRINT
+# Builtin type signatures:
+#   scribe(string)    -> OP_PRINTS (intrinsic, zero overhead)
+#   scribe(int)       -> OP_PRINT  (builtin, fast)
+#   scribe(double)    -> OP_PRINT
+#   scribe(bool)      -> OP_PRINT
+#   emit(value)       -> scribe(value); scribe("\n")
+
+# Input Functions
+feat listen_str() {
+    scale "";
+}
+
+feat listen_int() {
+    scale 0;
+}
+
+feat listen_val() {
+    scale 0.0;
+}
+
+feat listen_logic() {
+    scale false;
+}
+
+# File I/O
+feat inscribe(filename, content) {
+    
+}
+
+feat perceive(filename) {
+    scale "";
+}
+
+# ============================================================================
+# 🔢 Math - The Calculus Core
+# ============================================================================
+
+# Constants
+immo PI = 3.14159265358979323846;
+immo TAU = 6.28318530717958647692;
+immo EULER = 2.71828182845904523536;
+
+# Basic Math
+feat abs_val(x) {
+    verdict x < 0.0 { scale -x }
+    scale x;
+}
+
+feat root(x) {
+    scale x ** 0.5;
+}
+
+feat exp_val(base, exp) {
+    scale base ** exp;
+}
+
+feat floor_val(x) {
+    scale x - (x % 1.0);
+}
+
+feat ceiling_val(x) {
+    manifest frac = x % 1.0;
+    verdict frac == 0.0 { scale x }
+    scale x - frac + 1.0;
+}
+
+# Trigonometric (simplified - using approximation)
+feat sin_val(x) {
+    scale x;
+}
+
+feat cos_val(x) {
+    scale 1.0 - (x * x) / 2.0;
+}
+
+feat tan_val(x) {
+    scale x;
+}
+
+feat asin_val(x) {
+    scale x;
+}
+
+feat acos_val(x) {
+    scale PI / 2.0 - x;
+}
+
+# Utilities
+feat confine(val, min_val, max_val) {
+    verdict val < min_val { scale min_val }
+    verdict val > max_val { scale max_val }
+    scale val;
+}
+
+feat bridge(a, b, t) {
+    scale a + (b - a) * t;
+}
+
+# Random
+av _random_seed = 12345;
+
+feat _rand_next() {
+    _random_seed = (_random_seed * 1103515245 + 12345) % 2147483648;
+    scale _random_seed;
+}
+
+feat chaos_float() {
+    manifest r = _rand_next();
+    scale (r % 1000000) / 1000000.0;
+}
+
+feat chaos_int(min_val, max_val) {
+    manifest r = _rand_next();
+    scale min_val + (r % (max_val - min_val + 1));
+}
+
+feat chaos_pick(arr, size) {
+    verdict size == 0 { scale none }
+    scale arr[chaos_int(0, size - 1)];
+}
+
+# ============================================================================
+# 📝 Strings - The Lexicon Operations
+# ============================================================================
+
+# Info
+feat lex_span(str) {
+    scale str.size();
+}
+
+feat lex_void(str) {
+    scale str.size() == 0;
+}
+
+feat lex_glyph_at(str, index) {
+    verdict index < str.size() { scale str[index] }
+    scale '\0';
+}
+
+# Modification
+feat lex_elevate(str) {
+    scale str;
+}
+
+feat lex_depress(str) {
+    scale str;
+}
+
+feat lex_sanitize(str) {
+    scale str;
+}
+
+feat lex_swap(str, from, to) {
+    scale str;
+}
+
+# Search
+feat lex_find(str, sub) {
+    scale str.has(sub);
+}
+
+feat lex_anchors_with(str, pref) {
+    scale str.startswith(pref);
+}
+
+feat lex_trails_with(str, suff) {
+    scale str.endswith(suff);
+}
+
+# Conversion
+feat lex_parse_int(str) {
+    scale 0;
+}
+
+feat lex_parse_float(str) {
+    scale 0.0;
+}
+
+feat lex_parse_logic(str) {
+    verdict str == "true" || str == "1" { scale true }
+    scale false;
+}
+
+# Advanced
+feat lex_shatter(str, delim) {
+    scale [];
+}
+
+feat lex_weave(parts, sep) {
+    scale "";
+}
+
+# ============================================================================
+# 🛠️ Type Conversion
+# ============================================================================
+
+feat to_text(val) {
+    scale "";
+}
+
+feat to_integer(str) {
+    scale 0;
+}
+
+feat to_number(str) {
+    scale 0.0;
+}

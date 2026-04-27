@@ -1,0 +1,7 @@
+absorb std;
+
+feat main() {
+    av v = Vec();
+    push(v, 42);
+    flow get(v, 0);
+}

@@ -1,0 +1,5 @@
+av x = 10;
+av y = 20;
+
+scribe(f"Hello {x}");
+scribe(f"x={x}, y={y}");

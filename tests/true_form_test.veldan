@@ -1,0 +1,12 @@
+# Test TRUE FORM opcodes and native codegen
+av x = 42;
+av y = 100;
+
+# Test flow (mov) - should work in assembler
+origin;
+flow rax, 42      # mov rax, 42;
+flow rbx, 100     # mov rbx, 100;
+halt;
+
+# Back to normal code
+scribe("TRUE FORM test complete!");

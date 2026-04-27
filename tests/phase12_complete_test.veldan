@@ -1,0 +1,91 @@
+# Phase 12: Complete Language Test
+# Test all keywords and hybrid syntax styles
+
+# === DECLARATION KEYWORDS ===
+av x = 42;
+av y = 100;
+limit z = 200;
+senect a = 300;
+immo b = 400;
+evolve c = 500;
+species d = 600;
+
+# === MEMORY KEYWORDS ===
+vec myVec;
+echo myRef;
+touch myVar;
+forge(1000);
+pur(500);
+clm(250);
+rsz(myRef, 2000);
+ee ptr;
+ee_inf_layers obj;
+
+# === FLOW CONTROL - BRACE STYLE ===
+verdict x > 0 {
+    scribe("x is positive");
+} fail {
+    scribe("x is negative");
+}
+
+# === FLOW CONTROL - COLON STYLE ===
+verdict y > 50:;
+    scribe("y > 50");
+faildict y < 25:;
+    scribe("y < 25");
+fail:;
+    scribe("y between 25-50");
+
+# === FLOW CONTROL - CYCLE ===
+cycle i in 0..5:;
+    scribe(i);
+
+# === FUNCTION DEFINITIONS ===
+feat greet(name):;
+    scribe("Hello, ");
+    scribe(name);
+
+ability add(a, b):;
+    return a + b;
+
+fn multiply(x, y):;
+    return x * y;
+
+# === OOP - RACE WITH BRACES ===
+race Person {
+    ego.name = "John";
+    ego.age = 30;
+    ability getName():;
+        return ego.name;
+}
+
+# === OOP - RACE WITH COLON ===
+race Animal:;
+    ego.species = "Cat";
+    ego.sound = "Meow";
+    ability makeSound():;
+        return ego.sound;
+
+# === SYSTEM COMMANDS ===
+origin;
+flow rax, 42      # mov rax, 42;
+sink 10           # push 10;
+rise              # pop;
+summon greet      # call greet;
+resoul            # ret;
+leap label        # jmp label;
+petition          # syscall;
+halt              # int/hlt;
+idle              # nop;
+
+# === COMPLEX EXPRESSIONS ===
+av result = (x + y) * z;
+verdict result > 1000:;
+    scribe("Result is large!");
+faildict result < 500:;
+    scribe("Result is small");
+fail:;
+    scribe("Result is medium");
+
+# === SUCCESS MESSAGE ===
+scribe("Phase 12: All keywords and hybrid syntax - TEST PASSED!");

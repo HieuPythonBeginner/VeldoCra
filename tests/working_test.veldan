@@ -1,0 +1,7 @@
+# Simple working test for VeldoCra
+av x = 42;
+av y = 100;
+
+scribe("Hello VeldoCra!");
+scribe(x);
+scribe(y);

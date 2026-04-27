@@ -1,0 +1,6 @@
+# Simple test WITHOUT semicolons
+av x = 42;
+av y = 100;
+av z = x + y;
+print(z);
+

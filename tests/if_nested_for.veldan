@@ -1,0 +1,7 @@
+feat main() {
+    if x == 0
+        for j : 5 {
+            ego.print(j);
+        }
+    scale 0;
+}

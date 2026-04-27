@@ -1,0 +1,201 @@
+//
+// VeldoCra Self-Host: token.vel
+// Mirror of src/frontend/lexer/token.h TokenType enum
+// For self-hosted lexer development
+//
+
+// Special tokens
+EndOfFile = 0;
+Error;
+Newline;
+Indent;
+Dedent;
+
+// Literals
+Identifier;
+Integer;
+Float;
+String;
+Char;
+Boolean;
+
+// Legacy Keywords (for compatibility/transition)
+Kw_Print;
+Kw_Scribe;  // Print builtin (intrinsic)
+Kw_If;
+Kw_Else;
+Kw_Elif;
+Kw_For;
+Kw_While;
+Kw_Def;
+Kw_Class;
+Kw_Return;
+Kw_Break;
+Kw_Continue;
+Kw_Pass;
+Kw_Fn;
+Kw_Mut;
+Kw_Let;
+Kw_Const;
+Kw_Struct;
+Kw_Enum;
+Kw_Match;
+Kw_Import;
+Kw_From;
+Kw_As;
+Kw_True;
+Kw_False;
+Kw_None;
+
+// VeldoCra Phase 7 Keywords - Genesis (Declarations)
+Kw_Av           ;// var
+Kw_Limit        ;// let
+Kw_Senect       ;// auto
+Kw_Immo         ;// const
+Kw_Omni         ;// static
+Kw_Evolve       ;// mut
+Kw_Species      ;// type
+
+// Causality Control (Flow)
+Kw_Verdict      ;// if
+Kw_Fail         ;// else
+Kw_Faildict     ;// elif/else-if
+Kw_Path         ;// switch
+Kw_Analysis     ;// match
+Kw_Cycle        ;// for
+Kw_Sustain      ;// while
+Kw_Samsara      ;// loop
+Kw_End          ;// break
+Kw_Skip         ;// continue
+
+// Abilities & Actions (Functions)
+Kw_Ability      ;// def
+Kw_Feat         ;// fn
+Kw_Hax          ;// func
+Kw_Scale        ;// return
+Kw_Stasis       ;// yield
+Kw_NonLinear    ;// async
+Kw_Wait         ;// await
+
+// Entity Morphology (OOP)
+Kw_Race         ;// class
+Kw_Avatar       ;// struct
+Kw_Grant        ;// impl
+Kw_Blessing     ;// trait
+Kw_Contract     ;// interface
+Kw_Glory        ;// public
+Kw_Void         ;// private
+Kw_Core         ;// self
+Kw_Ego          ;// this
+
+// Soul Manipulation (Memory/Low-level)
+Kw_Vec          ;// ptr
+Kw_Echo         ;// ref
+Kw_Touch        ;// deref
+Kw_Forge        ;// alloc
+Kw_Pur          ;// calloc
+Kw_Clm          ;// malloc
+Kw_Rsz          ;// realloc
+Kw_Ee           ;// free
+Kw_Manifest     ;// new
+Kw_EeInfLayers  ;// delete
+Kw_Forbidden    ;// unsafe
+Kw_Anomaly      ;// volatile
+Kw_Cap          ;// sizeof
+
+// True Form (System/ASM)
+Kw_Origin       ;// asm
+Kw_Flow         ;// mov
+Kw_Sink         ;// push
+Kw_Rise         ;// pop
+Kw_Summon       ;// call
+Kw_Resoul       ;// ret
+Kw_Leap         ;// jmp
+Kw_Halt         ;// int
+Kw_Petition     ;// syscall
+Kw_Inhale       ;// in
+Kw_Exhale       ;// out
+
+// Doomsday Protocols (Error/End)
+Kw_Clash        ;// try
+Kw_Counter      ;// catch/except
+Kw_Lowdiff      ;// panic
+Kw_Debuff       ;// raise
+Kw_Dispel       ;// drop
+Kw_EndOfCanon   ;// exit
+
+// Module & Import System
+Kw_Absorb       ;// include
+Kw_Federation   ;// module
+Kw_Legion       ;// package
+Kw_Proclaim     ;// export
+Kw_Alias        ;// as
+Kw_Domain       ;// namespace
+
+// Operators (all)
+Plus;
+Minus;
+Star;
+Slash;
+Percent;
+Ampersand;
+Pipe;
+Caret;
+Tilde;
+Exclaim;
+Question;
+Colon;
+Semicolon;
+Comma;
+Dot;
+
+// Assignment
+Assign;
+PlusAssign;
+MinusAssign;
+StarAssign;
+SlashAssign;
+ColonAssign;
+
+// Comparison
+Eq;
+Neq;
+Lt;
+Gt;
+Lte;
+Gte;
+And;
+Or;
+
+// Shift
+LShift;
+RShift;
+
+// Brackets
+ParenOpen;
+ParenClose;
+BraceOpen;
+BraceClose;
+BracketOpen;
+BracketClose;
+
+// Arrow
+Arrow;
+
+// Comment
+Comment;
+
+// TokenType COUNT
+COUNT;
+
+av token_types = all above enums;
+print("VeldoCra token.vel loaded - ", COUNT, " token types ready for self-host lexer!");
+
+# Test self-check
+av test_token = Kw_Manifest;
+if test_token == Kw_Manifest {
+    print("✅ token.vel self-check: Kw_Manifest recognized");
+} else {
+    lowdiff "token.vel integrity fail";
+}
+

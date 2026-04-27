@@ -1,0 +1,85 @@
+// IR.vel - Intermediate Representation for VeldoCra
+
+// IR Opcodes
+immo IR_OP_INVALID = 0;
+immo IR_OP_NOP = 1;
+immo IR_OP_BR = 2;
+immo IR_OP_BR_COND = 3;
+immo IR_OP_RET = 4;
+immo IR_OP_ADD = 5;
+immo IR_OP_SUB = 6;
+immo IR_OP_MUL = 7;
+immo IR_OP_LOAD = 8;
+immo IR_OP_STORE = 9;
+immo IR_OP_CALL = 10;
+
+// IR Value
+race IRValue {
+    core.kind  ;// constant, register, etc.
+    core.type;
+    core.int_val;
+    core.str_val;
+}
+
+// IR Instruction
+race IRInstruction {
+    core.opcode;
+    core.operands  ;// vec of IRValue
+    core.result_type;
+}
+
+// IR Basic Block
+race IRBasicBlock {
+    core.name;
+    core.instructions  ;// vec of IRInstruction
+    core.successors  ;// vec of IRBasicBlock
+    core.predecessors;
+}
+
+// IR Function
+race IRFunction {
+    core.name;
+    core.return_type;
+    core.blocks  ;// vec of IRBasicBlock
+    core.arguments  ;// vec of IRValue
+}
+
+// IR Module
+race IRModule {
+    core.name;
+    core.functions  ;// vec of IRFunction
+    core.globals  ;// map string to IRValue
+}
+
+// Create IR module
+feat create_ir_module(name) {
+    manifest module = forge(32);
+    core.name(module) = name;
+    core.functions(module) = vec();
+    core.globals(module) = map();
+    scale module;
+}
+
+// Add function to module
+feat add_function(module, func) {
+    push(core.functions(module), func);
+}
+
+// Create IR function
+feat create_ir_function(name, return_type) {
+    manifest func = forge(32);
+    core.name(func) = name;
+    core.return_type(func) = return_type;
+    core.blocks(func) = vec();
+    core.arguments(func) = vec();
+    scale func;
+}
+
+// Create IR instruction
+feat create_ir_instruction(opcode, operands, result_type) {
+    manifest inst = forge(32);
+    core.opcode(inst) = opcode;
+    core.operands(inst) = operands;
+    core.result_type(inst) = result_type;
+    scale inst;
+}

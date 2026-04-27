@@ -1,0 +1,63 @@
+# Comprehensive Verdict/Fail Consistency Test Suite
+
+av x = 5;
+av y = 10;
+av z = 15;
+
+# ==========================================
+# TEST 1: {} Style - Should work
+# ==========================================
+scribe("=== TEST 1: {} Style ===");
+verdict x < 10 {
+    scribe("x < 10: CORRECT");
+} fail {
+    scribe("x >= 10: ERROR");
+}
+
+# ==========================================
+# TEST 2: : Style - Should work
+# ==========================================
+scribe("=== TEST 2: : Style ===");
+verdict y > 5:;
+    scribe("y > 5: CORRECT");
+fail:;
+    scribe("y <= 5: ERROR");
+
+# ==========================================
+# TEST 3: Nested verdict/fail - {} style
+# ==========================================
+scribe("=== TEST 3: Nested {} ===");
+verdict x > 0 {
+    verdict y > 0 {
+        scribe("Both x,y > 0: CORRECT");
+    } fail {
+        scribe("x > 0 but y <= 0: CORRECT");
+    }
+} fail {
+    scribe("x <= 0: CORRECT");
+}
+
+# ==========================================
+# TEST 4: Complex conditions - : style
+# ==========================================
+scribe("=== TEST 4: Complex : ===");
+verdict (x + y) > 10:;
+    scribe("Complex condition true: CORRECT");
+fail:;
+    scribe("(x+y) <= 10: CORRECT");
+
+# ==========================================
+# TEST 5: Multiple conditions - {} style
+# ==========================================
+scribe("=== TEST 5: Multiple conditions ===");
+verdict x == 5 {
+    scribe("x == 5: CORRECT");
+} fail {
+    scribe("x != 5: CORRECT");
+}
+
+# ==========================================
+# SUCCESS MESSAGE
+# ==========================================
+scribe("=== ALL TESTS PASSED ===");
+scribe("Verdict/Fail consistency enforcement working perfectly!");

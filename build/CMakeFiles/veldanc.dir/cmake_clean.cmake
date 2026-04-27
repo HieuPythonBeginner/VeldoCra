@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/veldanc.dir/src/backend/codegen/codegen_fixed.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/codegen/codegen_fixed.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/assembler.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/assembler.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/elf.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/elf.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/native_codegen.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/native_codegen.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/opcode.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/native_codegen/opcode.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/backend/vm/gc.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/vm/gc.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/backend/vm/vm.cpp.o"
+  "CMakeFiles/veldanc.dir/src/backend/vm/vm.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/driver/driver.cpp.o"
+  "CMakeFiles/veldanc.dir/src/driver/driver.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/frontend/ast/ast.cpp.o"
+  "CMakeFiles/veldanc.dir/src/frontend/ast/ast.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/frontend/lexer/lexer.cpp.o"
+  "CMakeFiles/veldanc.dir/src/frontend/lexer/lexer.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/frontend/parser/parser.cpp.o"
+  "CMakeFiles/veldanc.dir/src/frontend/parser/parser.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/frontend/source/source.cpp.o"
+  "CMakeFiles/veldanc.dir/src/frontend/source/source.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/main.cpp.o"
+  "CMakeFiles/veldanc.dir/src/main.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/middle/ir/ir.cpp.o"
+  "CMakeFiles/veldanc.dir/src/middle/ir/ir.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/middle/ownership/ownership.cpp.o"
+  "CMakeFiles/veldanc.dir/src/middle/ownership/ownership.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/middle/types/type.cpp.o"
+  "CMakeFiles/veldanc.dir/src/middle/types/type.cpp.o.d"
+  "CMakeFiles/veldanc.dir/src/stdlib/stdlib.cpp.o"
+  "CMakeFiles/veldanc.dir/src/stdlib/stdlib.cpp.o.d"
+  "bin/veldanc"
+  "bin/veldanc.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/veldanc.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

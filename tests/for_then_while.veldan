@@ -1,0 +1,8 @@
+feat main() {
+    for i : 0
+        av z = i * 2;
+    while x > 0 {
+        x = x - 1;
+    }
+    scale 0;
+}

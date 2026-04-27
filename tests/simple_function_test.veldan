@@ -1,0 +1,8 @@
+# Simple function test
+av x = 5;
+
+ability greet(name):;
+    scribe("Hello ");
+    scribe(name);
+
+greet("World");

@@ -1,0 +1,5 @@
+feat main() {
+    for i : 0
+        av z = i * 2;
+    scale 0;
+}

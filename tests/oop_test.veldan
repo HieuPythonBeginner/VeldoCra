@@ -1,0 +1,121 @@
+// Comprehensive OOP Test - Phase 16 Features
+// Testing race (class), avatar (struct), inheritance, polymorphism
+
+race Animal {
+    av name: str;
+    av age: int;
+
+    ego.name = "Unknown Animal";
+    ego.age = 0;
+
+    feat make_sound() -> str {
+        scale "Some generic animal sound";
+    }
+
+    feat get_info() -> str {
+        scale ego.name + " (age: " + ego.age.to_string() + ")";
+    }
+}
+
+race Dog : Animal {
+    av breed: str;
+    ego.breed = "Mixed breed";
+
+    feat make_sound() -> str {
+        scale "Woof! Woof!";
+    }
+
+    feat fetch(item: str) -> str {
+        scale ego.name + " fetches the " + item + "!";
+    }
+}
+
+race Cat : Animal {
+    av lives_remaining: int;
+    ego.lives_remaining = 9;
+
+    feat make_sound() -> str {
+        scale "Meow!";
+    }
+
+    feat climb() -> str {
+        scale ego.name + " gracefully climbs to new heights";
+    }
+}
+
+avatar Point {
+    av x: int;
+    av y: int;
+
+    feat to_string() -> str {
+        scale "(" + ego.x.to_string() + ", " + ego.y.to_string() + ")";
+    }
+
+    feat distance(other: Point) -> float {
+        av dx = ego.x - other.x;
+        av dy = ego.y - other.y;
+        scale (dx * dx + dy * dy).to_float().sqrt();
+    }
+}
+
+feat demonstrate_polymorphism(animals: vec) -> void {
+    scribe("=== Polymorphism Demo ===\n");
+    cycle (i = 0; i < len(animals); i++) {
+        av animal = animals[i];
+        scribe("Animal " + i.to_string() + ": " + animal.make_sound() + "\n");
+    }
+    scribe("\n");
+}
+
+feat main() -> void {
+    scribe("=== VeldoCra OOP Comprehensive Test ===\n\n");
+
+    ;// Test basic inheritance
+    scribe("1. Basic Inheritance:\n");
+    av dog = Dog();
+    dog.name = "Buddy";
+    dog.age = 3;
+    dog.breed = "Golden Retriever";
+
+    av cat = Cat();
+    cat.name = "Whiskers";
+    cat.age = 2;
+
+    scribe("Dog info: " + dog.get_info() + " [" + dog.breed + "]\n");
+    scribe("Cat info: " + cat.get_info() + " [" + cat.lives_remaining.to_string() + " lives]\n");
+    scribe("\n");
+
+    ;// Test polymorphism
+    scribe("2. Method Overriding:\n");
+    scribe("Dog sound: " + dog.make_sound() + "\n");
+    scribe("Cat sound: " + cat.make_sound() + "\n");
+    scribe("\n");
+
+    ;// Test class-specific methods
+    scribe("3. Class-Specific Methods:\n");
+    scribe(dog.fetch("tennis ball") + "\n");
+    scribe(cat.climb() + "\n");
+    scribe("\n");
+
+    ;// Test structs
+    scribe("4. Struct (Avatar) Testing:\n");
+    av p1 = Point();
+    p1.x = 0;
+    p1.y = 0;
+
+    av p2 = Point();
+    p2.x = 3;
+    p2.y = 4;
+
+    scribe("Point 1: " + p1.to_string() + "\n");
+    scribe("Point 2: " + p2.to_string() + "\n");
+    scribe("Distance: " + p2.distance(p1).to_string() + "\n");
+    scribe("\n");
+
+    ;// Test polymorphism with array
+    scribe("5. Polymorphism with Collections:\n");
+    av animals = [dog, cat];
+    demonstrate_polymorphism(animals);
+
+    scribe("=== OOP Test Complete ===");
+}

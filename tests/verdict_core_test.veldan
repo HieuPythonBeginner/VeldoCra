@@ -1,0 +1,32 @@
+# Core Verdict/Fail Consistency Test
+
+av x = 5;
+av y = 10;
+
+# TEST 1: {} style - should work
+scribe("TEST 1: {} style");
+verdict x < 10 {
+    scribe("PASS: x < 10");
+} fail {
+    scribe("FAIL: x >= 10");
+}
+
+# TEST 2: : style - should work
+scribe("TEST 2: : style");
+verdict y > 5:;
+    scribe("PASS: y > 5");
+fail:;
+    scribe("FAIL: y <= 5");
+
+# TEST 3: Nested verdict - mixed styles
+scribe("TEST 3: Nested mixed styles");
+verdict x > 0 {
+    verdict y > 0:;
+        scribe("PASS: Both > 0");
+    fail:;
+        scribe("PASS: x > 0, y <= 0");
+} fail {
+    scribe("PASS: x <= 0");
+}
+
+scribe("ALL CONSISTENCY TESTS PASSED!");

@@ -1,0 +1,47 @@
+// Colorama FFI Demo - Using Python colorama library from VeldoCra
+// This demonstrates Python FFI integration with a popular library
+
+extern "python" {
+    ;// Colorama functions for terminal colors
+    feat init() -> void;  ;// Initialize colorama
+    feat Fore_RED() -> str;
+    feat Fore_GREEN() -> str;
+    feat Fore_BLUE() -> str;
+    feat Fore_YELLOW() -> str;
+    feat Fore_RESET() -> str;
+    feat Back_BLACK() -> str;
+    feat Back_WHITE() -> str;
+    feat Back_RESET() -> str;
+    feat Style_BRIGHT() -> str;
+    feat Style_RESET_ALL() -> str;
+}
+
+feat main() -> void {
+    ;// Initialize colorama
+    init();
+
+    ;// Get color codes
+    av red = Fore_RED();
+    av green = Fore_GREEN();
+    av blue = Fore_BLUE();
+    av yellow = Fore_YELLOW();
+    av reset = Fore_RESET();
+    av bright = Style_BRIGHT();
+    av reset_all = Style_RESET_ALL();
+
+    ;// Print colored text
+    scribe(bright + red + "=== VeldoCra FFI với Colorama ===\n" + reset);
+    scribe(green + "✓ Xanh lá: Thành công!\n" + reset);
+    scribe(blue + "ℹ Xanh dương: Thông tin\n" + reset);
+    scribe(yellow + "⚠ Vàng: Cảnh báo\n" + reset);
+    scribe(red + "✗ Đỏ: Lỗi\n" + reset);
+    scribe(reset_all + "Reset về màu bình thường\n");
+
+    ;// Background colors
+    av back_black = Back_BLACK();
+    av back_white = Back_WHITE();
+    av back_reset = Back_RESET();
+
+    scribe(back_white + "Nền trắng với chữ đen" + back_reset + "\n");
+    scribe(bright + red + back_black + "Chữ đỏ sáng trên nền đen!" + reset_all + "\n");
+}

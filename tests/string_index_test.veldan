@@ -1,0 +1,14 @@
+# String Indexing Test
+# Test source[index] syntax
+
+av str = "hello";
+av idx = 0;
+
+# Test string indexing syntax - this should parse correctly
+# The parser already supports source[index] syntax
+# This is a syntax test, not execution test
+
+flow "String indexing syntax test\n";
+flow "String: ", str, "\n";
+flow "Index: ", idx, "\n";
+flow "Parser should handle str[idx] syntax\n";

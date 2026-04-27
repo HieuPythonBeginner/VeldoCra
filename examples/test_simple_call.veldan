@@ -1,0 +1,12 @@
+# Test simple function call
+feat double(x: i32) -> i32 {
+    scale x + x;
+}
+
+feat main() {
+    av x = 21;
+    av result = double(x);
+    scribe("Result: ");
+    scribe(result);
+    scale 0;
+}

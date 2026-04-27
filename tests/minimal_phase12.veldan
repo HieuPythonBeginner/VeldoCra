@@ -1,0 +1,4 @@
+# Minimal Phase 12 Test - Test basic functionality
+av x = 42;
+av y = 100;
+scribe("Phase 12 basic test works!");

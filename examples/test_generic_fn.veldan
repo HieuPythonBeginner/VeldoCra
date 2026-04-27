@@ -1,0 +1,12 @@
+# Test basic generics - simple version
+feat identity<T>(value: T) -> T {
+    scale value;
+}
+
+feat main() {
+    av x = 42;
+    av result = identity<int>(x);
+    scribe("Result: ");
+    scribe(result);
+    scale 0;
+}

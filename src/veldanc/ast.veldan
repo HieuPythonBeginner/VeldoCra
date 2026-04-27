@@ -1,0 +1,452 @@
+# VeldoCra Self-Host AST - Node Definitions
+# Phase 12: AST nodes for self-hosted compiler
+# Based on C++ AST implementation in src/frontend/ast/ast.h
+
+# ============================================================================
+# Node Kind Constants
+# ============================================================================
+
+# Expressions
+immo NODE_EXPR = 0;
+immo NODE_LITERAL_EXPR = 1;
+immo NODE_VARIABLE_EXPR = 2;
+immo NODE_MEMBER_EXPR = 3;
+immo NODE_BINARY_EXPR = 4;
+immo NODE_UNARY_EXPR = 5;
+immo NODE_CALL_EXPR = 6;
+immo NODE_INDEX_EXPR = 7;
+immo NODE_ARRAY_EXPR = 8;
+immo NODE_DICT_EXPR = 9;
+immo NODE_LAMBDA_EXPR = 10;
+
+# Statements
+immo NODE_STMT = 100;
+immo NODE_EXPR_STMT = 101;
+immo NODE_BLOCK_STMT = 102;
+immo NODE_IF_STMT = 103;
+immo NODE_WHILE_STMT = 104;
+immo NODE_FOR_STMT = 105;
+immo NODE_RETURN_STMT = 106;
+immo NODE_BREAK_STMT = 107;
+immo NODE_CONTINUE_STMT = 108;
+immo NODE_LET_STMT = 109;
+immo NODE_CONST_STMT = 110;
+immo NODE_FN_STMT = 111;
+immo NODE_CLASS_STMT = 112;
+immo NODE_STRUCT_STMT = 113;
+immo NODE_ENUM_STMT = 114;
+immo NODE_IMPORT_STMT = 115;
+immo NODE_MATCH_STMT = 116;
+
+# Declarations
+immo NODE_DECL = 200;
+immo NODE_PARAM_DECL = 201;
+immo NODE_FIELD_DECL = 202;
+immo NODE_VARIANT_DECL = 203;
+
+# ============================================================================
+# Literal Type Constants
+# ============================================================================
+
+immo LITERAL_INT = 0;
+immo LITERAL_FLOAT = 1;
+immo LITERAL_STRING = 2;
+immo LITERAL_BOOL = 3;
+immo LITERAL_CHAR = 4;
+immo LITERAL_NONE = 5;
+
+# ============================================================================
+# Value Category Constants
+# ============================================================================
+
+immo VALUE_RVALUE = 0;
+immo VALUE_LVALUE = 1;
+
+# ============================================================================
+# AST Node Structure (Simulated with arrays)
+# ============================================================================
+# Each node is represented as an array:
+# [0] = kind (node type)
+# [1] = line number
+# [2] = column number
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (0=rvalue, 1=lvalue)
+# [6+] = node-specific data
+
+# ============================================================================
+# Node Creation Functions
+# ============================================================================
+
+feat create_node(kind, line, column, start, end) {
+    manifest node = forge(64);
+    node[0] = kind;
+    node[1] = line;
+    node[2] = column;
+    node[3] = start;
+    node[4] = end;
+    node[5] = 0;
+    scale node;
+}
+
+feat create_expr_node(kind, line, column, start, end, value_cat) {
+    manifest node = forge(64);
+    node[0] = kind;
+    node[1] = line;
+    node[2] = column;
+    node[3] = start;
+    node[4] = end;
+    node[5] = value_cat;
+    scale node;
+}
+
+# ============================================================================
+# Literal Expression Node
+# ============================================================================
+# [0] = kind (NODE_LITERAL_EXPR)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category
+# [6] = literal type (LITERAL_INT, LITERAL_FLOAT, etc.)
+# [7] = literal value (as integer)
+
+feat create_literal_expr(line, column, start, end, literal_type, value) {
+    av node = create_expr_node(NODE_LITERAL_EXPR, line, column, start, end, 0);
+    node[6] = literal_type;
+    node[7] = value;
+    scale node;
+}
+
+# ============================================================================
+# Variable Expression Node
+# ============================================================================
+# [0] = kind (NODE_VARIABLE_EXPR)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category
+# [6] = variable name (as string)
+
+feat create_variable_expr(line, column, start, end, name) {
+    av node = create_expr_node(NODE_VARIABLE_EXPR, line, column, start, end, 1);
+    node[6] = name;
+    scale node;
+}
+
+# ============================================================================
+# Binary Expression Node
+# ============================================================================
+# [0] = kind (NODE_BINARY_EXPR)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category
+# [6] = operator (as integer)
+# [7] = left operand (node index)
+# [8] = right operand (node index)
+
+feat create_binary_expr(line, column, start, end, op, left, right) {
+    av node = create_expr_node(NODE_BINARY_EXPR, line, column, start, end, 0);
+    node[6] = op;
+    node[7] = left;
+    node[8] = right;
+    scale node;
+}
+
+# ============================================================================
+# Unary Expression Node
+# ============================================================================
+# [0] = kind (NODE_UNARY_EXPR)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category
+# [6] = operator (as integer)
+# [7] = operand (node index)
+
+feat create_unary_expr(line, column, start, end, op, operand) {
+    av node = create_expr_node(NODE_UNARY_EXPR, line, column, start, end, 0);
+    node[6] = op;
+    node[7] = operand;
+    scale node;
+}
+
+# ============================================================================
+# Call Expression Node
+# ============================================================================
+# [0] = kind (NODE_CALL_EXPR)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category
+# [6] = callee (node index)
+# [7] = argument count
+# [8+] = arguments (node indices)
+
+feat create_call_expr(line, column, start, end, callee) {
+    av node = create_expr_node(NODE_CALL_EXPR, line, column, start, end, 0);
+    node[6] = callee;
+    node[7] = 0;
+    scale node;
+}
+
+feat add_call_argument(node, arg) {
+    node.push(arg);
+    node[7] = node[7] + 1  # increment argument count;
+}
+
+# ============================================================================
+# Index Expression Node
+# ============================================================================
+# [0] = kind (NODE_INDEX_EXPR)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category
+# [6] = object (node index)
+# [7] = index (node index)
+
+feat create_index_expr(line, column, start, end, object, index) {
+    av node = create_expr_node(NODE_INDEX_EXPR, line, column, start, end, 1);
+    node[6] = object;
+    node[7] = index;
+    scale node;
+}
+
+# ============================================================================
+# Block Statement Node
+# ============================================================================
+# [0] = kind (NODE_BLOCK_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = statement count
+# [7+] = statements (node indices)
+
+feat create_block_stmt(line, column, start, end) {
+    av node = create_node(NODE_BLOCK_STMT, line, column, start, end);
+    node[6] = 0;
+    scale node;
+}
+
+feat add_block_statement(node, stmt) {
+    node.push(stmt);
+    node[6] = node[6] + 1  # increment statement count;
+}
+
+# ============================================================================
+# If Statement Node
+# ============================================================================
+# [0] = kind (NODE_IF_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = condition (node index)
+# [7] = then branch (node index)
+# [8] = else branch (node index, -1 if none)
+
+feat create_if_stmt(line, column, start, end, condition, then_branch, else_branch) {
+    av node = create_node(NODE_IF_STMT, line, column, start, end);
+    node[6] = condition;
+    node[7] = then_branch;
+    node[8] = else_branch;
+    scale node;
+}
+
+# ============================================================================
+# While Statement Node
+# ============================================================================
+# [0] = kind (NODE_WHILE_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = condition (node index)
+# [7] = body (node index)
+
+feat create_while_stmt(line, column, start, end, condition, body) {
+    av node = create_node(NODE_WHILE_STMT, line, column, start, end);
+    node[6] = condition;
+    node[7] = body;
+    scale node;
+}
+
+# ============================================================================
+# For Statement Node
+# ============================================================================
+# [0] = kind (NODE_FOR_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = iterator name (as string)
+# [7] = iterable (node index)
+# [8] = body (node index)
+
+feat create_for_stmt(line, column, start, end, iterator_name, iterable, body) {
+    av node = create_node(NODE_FOR_STMT, line, column, start, end);
+    node[6] = iterator_name;
+    node[7] = iterable;
+    node[8] = body;
+    scale node;
+}
+
+# ============================================================================
+# Return Statement Node
+# ============================================================================
+# [0] = kind (NODE_RETURN_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = value (node index, -1 if none)
+
+feat create_return_stmt(line, column, start, end, value) {
+    av node = create_node(NODE_RETURN_STMT, line, column, start, end);
+    node[6] = value;
+    scale node;
+}
+
+# ============================================================================
+# Let Statement Node
+# ============================================================================
+# [0] = kind (NODE_LET_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = variable name (as string)
+# [7] = type expression (node index, -1 if none)
+# [8] = initializer (node index, -1 if none)
+# [9] = is mutable (0 or 1)
+
+feat create_let_stmt(line, column, start, end, name, type_expr, initializer, is_mutable) {
+    av node = create_node(NODE_LET_STMT, line, column, start, end);
+    node[6] = name;
+    node[7] = type_expr;
+    node[8] = initializer;
+    node[9] = is_mutable;
+    scale node;
+}
+
+# ============================================================================
+# Function Statement Node
+# ============================================================================
+# [0] = kind (NODE_FN_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = function name (as string)
+# [7] = parameter count
+# [8] = body (node index)
+# [9] = return type (node index, -1 if none)
+# [10+] = parameters (node indices)
+
+feat create_fn_stmt(line, column, start, end, name, body, return_type) {
+    av node = create_node(NODE_FN_STMT, line, column, start, end);
+    node[6] = name;
+    node[7] = 0;
+    node[8] = body;
+    node[9] = return_type;
+    scale node;
+}
+
+feat add_fn_parameter(node, param) {
+    node.push(param);
+    node[7] = node[7] + 1  # increment parameter count;
+}
+
+# ============================================================================
+# Parameter Declaration Node
+# ============================================================================
+# [0] = kind (NODE_PARAM_DECL)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for declarations)
+# [6] = parameter name (as string)
+# [7] = type expression (node index, -1 if none)
+# [8] = default value (node index, -1 if none)
+
+feat create_param_decl(line, column, start, end, name, type_expr, default_value) {
+    av node = create_node(NODE_PARAM_DECL, line, column, start, end);
+    node[6] = name;
+    node[7] = type_expr;
+    node[8] = default_value;
+    scale node;
+}
+
+# ============================================================================
+# Expression Statement Node
+# ============================================================================
+# [0] = kind (NODE_EXPR_STMT)
+# [1] = line
+# [2] = column
+# [3] = start offset
+# [4] = end offset
+# [5] = value category (not used for statements)
+# [6] = expression (node index)
+
+feat create_expr_stmt(line, column, start, end, expr) {
+    av node = create_node(NODE_EXPR_STMT, line, column, start, end);
+    node[6] = expr;
+    scale node;
+}
+
+# ============================================================================
+# Node Kind to String (for debugging)
+# ============================================================================
+
+feat node_kind_to_string(kind) {
+    verdict kind == NODE_EXPR { scale "Expr" }
+    verdict kind == NODE_LITERAL_EXPR { scale "LiteralExpr" }
+    verdict kind == NODE_VARIABLE_EXPR { scale "VariableExpr" }
+    verdict kind == NODE_MEMBER_EXPR { scale "MemberExpr" }
+    verdict kind == NODE_BINARY_EXPR { scale "BinaryExpr" }
+    verdict kind == NODE_UNARY_EXPR { scale "UnaryExpr" }
+    verdict kind == NODE_CALL_EXPR { scale "CallExpr" }
+    verdict kind == NODE_INDEX_EXPR { scale "IndexExpr" }
+    verdict kind == NODE_ARRAY_EXPR { scale "ArrayExpr" }
+    verdict kind == NODE_DICT_EXPR { scale "DictExpr" }
+    verdict kind == NODE_LAMBDA_EXPR { scale "LambdaExpr" }
+    verdict kind == NODE_STMT { scale "Stmt" }
+    verdict kind == NODE_EXPR_STMT { scale "ExprStmt" }
+    verdict kind == NODE_BLOCK_STMT { scale "BlockStmt" }
+    verdict kind == NODE_IF_STMT { scale "IfStmt" }
+    verdict kind == NODE_WHILE_STMT { scale "WhileStmt" }
+    verdict kind == NODE_FOR_STMT { scale "ForStmt" }
+    verdict kind == NODE_RETURN_STMT { scale "ReturnStmt" }
+    verdict kind == NODE_BREAK_STMT { scale "BreakStmt" }
+    verdict kind == NODE_CONTINUE_STMT { scale "ContinueStmt" }
+    verdict kind == NODE_LET_STMT { scale "LetStmt" }
+    verdict kind == NODE_CONST_STMT { scale "ConstStmt" }
+    verdict kind == NODE_FN_STMT { scale "FnStmt" }
+    verdict kind == NODE_CLASS_STMT { scale "ClassStmt" }
+    verdict kind == NODE_STRUCT_STMT { scale "StructStmt" }
+    verdict kind == NODE_ENUM_STMT { scale "EnumStmt" }
+    verdict kind == NODE_IMPORT_STMT { scale "ImportStmt" }
+    verdict kind == NODE_MATCH_STMT { scale "MatchStmt" }
+    verdict kind == NODE_DECL { scale "Decl" }
+    verdict kind == NODE_PARAM_DECL { scale "ParamDecl" }
+    verdict kind == NODE_FIELD_DECL { scale "FieldDecl" }
+    verdict kind == NODE_VARIANT_DECL { scale "VariantDecl" }
+    scale "Unknown";
+}

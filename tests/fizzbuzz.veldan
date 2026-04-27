@@ -1,0 +1,16 @@
+feat fizzbuzz() {
+    av i = 1;
+    sustain i <= 101 {
+        verdict i % 15 == 0 {
+            scribe("FizzBuzz");
+        } faildict i % 3 == 0 {
+            scribe("Fizz");
+        } faildict i % 5 == 0 {
+            scribe("Buzz");
+        } fail {
+            scribe(i);
+        }
+        scribe("\n");
+        evolve i = i + 1;
+    }
+}

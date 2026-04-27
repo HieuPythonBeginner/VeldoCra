@@ -1,0 +1,80 @@
+// Ownership.vel - Ownership Checker for VeldoCra
+// Zero-cost compile-time ownership analysis
+
+// Ownership kinds
+immo OWNERSHIP_NONE = 0;
+immo OWNERSHIP_OWNED = 1;
+immo OWNERSHIP_BORROWED = 2;
+immo OWNERSHIP_BORROWED_MUT = 3;
+immo OWNERSHIP_MOVED = 4;
+immo OWNERSHIP_STATIC = 5;
+immo OWNERSHIP_WEAK = 6;
+immo OWNERSHIP_DESTROYED = 7;
+
+// Ownership info
+race OwnershipInfo {
+    core.kind;
+    core.type_name;
+}
+
+// Ownership context
+race OwnershipContext {
+    core.variables  ;// map string to OwnershipInfo
+    core.scope_stack  ;// stack of scope variables
+    core.current_point;
+    core.verbose;
+}
+
+// Create ownership context
+feat create_ownership_context() {
+    manifest ctx = forge(32);
+    core.variables(ctx) = map();
+    core.scope_stack(ctx) = vec();
+    core.current_point(ctx) = 0;
+    core.verbose(ctx) = false;
+    scale ctx;
+}
+
+// Declare variable
+feat declare_variable(ctx, name, kind, type_name) {
+    av info = OwnershipInfo();
+    core.kind(info) = kind;
+    core.type_name(info) = type_name;
+    core.variables(ctx)[name] = info;
+    push(core.scope_stack(ctx), name);
+}
+
+// Move variable
+feat move_variable(ctx, name) {
+    verdict has(core.variables(ctx), name) {
+        core.kind(core.variables(ctx)[name]) = OWNERSHIP_MOVED;
+    }
+}
+
+// Borrow variable
+feat borrow_variable(ctx, borrower, lender, mutable) {
+    verdict has(core.variables(ctx), lender) {
+        av kind = verdict mutable { OWNERSHIP_BORROWED_MUT } fail { OWNERSHIP_BORROWED }
+        av info = OwnershipInfo();
+        core.kind(info) = kind;
+        core.type_name(info) = "";
+        core.variables(ctx)[borrower] = info;
+        push(core.scope_stack(ctx), borrower);
+    }
+}
+
+// End borrow
+feat end_borrow(ctx, name) {
+    verdict has(core.variables(ctx), name) {
+        core.kind(core.variables(ctx)[name]) = OWNERSHIP_NONE;
+    }
+}
+
+// Check ownership safety
+feat check_ownership(ctx, ast_root) {
+    ;// Walk AST and check ownership rules
+    ;// Simplified: just check for moved variables
+    av result = vec();
+    ;// TODO: Implement full AST walking
+    scale result;
+}

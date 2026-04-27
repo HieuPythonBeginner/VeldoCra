@@ -1,0 +1,4 @@
+# Test return constant
+feat main() {
+    scale 42;
+}

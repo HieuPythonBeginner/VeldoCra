@@ -1,0 +1,8 @@
+av x = 10;
+
+verdict x > 5 {
+    scribe("yes");
+} fail {
+    scribe("no");
+}
+

@@ -1,0 +1,21 @@
+# Test Pattern Matching - No commas
+feat main() {
+    # Test 1: Basic literal pattern
+    av x = 1;
+    analysis x {
+        0 => scribe("zero")
+        1 => scribe("one")
+        2 => scribe("two")
+        _ => scribe("other")
+    }
+
+    # Test 2: String pattern
+    av name = "Alice";
+    analysis name {
+        "Alice" => scribe("Hello Alice!")
+        "Bob" => scribe("Hello Bob!")
+        _ => scribe("Hello stranger!")
+    }
+
+    scale 0;
+}

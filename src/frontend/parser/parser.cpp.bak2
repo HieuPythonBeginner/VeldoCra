@@ -1,0 +1,1052 @@
+/**
+ * @file parser.cpp
+ * @brief VeldoCra Parser - Implementation
+ * @author Dr. Bright
+ * 
+ * Recursive descent parser that converts tokens to AST using arena allocator.
+ */
+
+#include "parser.h"
+#include <cstring>
+#include <iostream>
+#include <sstream>
+
+namespace veldanava {
+namespace parser {
+
+using namespace veldanava::lexer;
+using namespace veldanava::ast;
+
+// ============================================================================
+// Parser Implementation
+// ============================================================================
+
+/**
+ * @brief Construct parser with token stream
+ */
+Parser::Parser(const TokenStream& tokens, std::string_view source)
+    : tokens_(tokens)
+    , source_(source)
+    , current_(0)
+    , error_count_(0)
+    , at_line_start_(true) {
+}
+
+/**
+ * @brief Destructor
+ */
+Parser::~Parser() = default;
+
+/**
+ * @brief Move constructor
+ */
+Parser::Parser(Parser&& other) noexcept
+    : tokens_(other.tokens_)
+    , source_(other.source_)
+    , builder_(std::move(other.builder_))
+    , current_(other.current_)
+    , error_count_(other.error_count_)
+    , at_line_start_(other.at_line_start_) {
+}
+
+/**
+ * @brief Move assignment
+ */
+Parser& Parser::operator=(Parser&& other) noexcept {
+    if (this != &other) {
+        source_ = other.source_;
+        current_ = other.current_;
+        error_count_ = other.error_count_;
+        at_line_start_ = other.at_line_start_;
+    }
+    return *this;
+}
+
+// ===== Token Access =====
+
+const Token& Parser::current_token() const {
+    if (current_ < tokens_.size()) {
+        return tokens_[current_];
+    }
+    // Return EOF token if past end
+    static const Token eof_token{TokenType::EndOfFile, 0, 0, 0, 0, 0};
+    return eof_token;
+}
+
+const Token& Parser::peek_token(size_t offset) const {
+    size_t idx = current_ + offset;
+    if (idx < tokens_.size()) {
+        return tokens_[idx];
+    }
+    static const Token eof_token{TokenType::EndOfFile, 0, 0, 0, 0, 0};
+    return eof_token;
+}
+
+bool Parser::is_at_end() const {
+    return current_token().type == TokenType::EndOfFile;
+}
+
+void Parser::advance() {
+    current_++;
+    // Skip newlines at line start
+    while (current_token().type == TokenType::Newline && at_line_start_) {
+        current_++;
+        at_line_start_ = true;
+    }
+}
+
+bool Parser::check(TokenType type) const {
+    if (is_at_end()) return false;
+    return current_token().type == type;
+}
+
+bool Parser::check_next(TokenType type) const {
+    return peek_token(1).type == type;
+}
+
+bool Parser::match(TokenType type) {
+    if (check(type)) {
+        advance();
+        return true;
+    }
+    return false;
+}
+
+bool Parser::match_any(const std::vector<TokenType>& types) {
+    for (TokenType type : types) {
+        if (check(type)) {
+            advance();
+            return true;
+        }
+    }
+    return false;
+}
+
+// ===== Error Handling =====
+
+void Parser::report_error(std::string_view message) {
+    error_count_++;
+    std::cerr << "Parse Error (line " << current_token().line 
+              << ", col " << current_token().column << "): " 
+              << message << "\n";
+}
+
+void Parser::report_error_at(std::string_view message, size_t line, size_t column) {
+    error_count_++;
+    std::cerr << "Parse Error (line " << line << ", col " << column 
+              << "): " << message << "\n";
+}
+
+void Parser::synchronize() {
+    // Skip tokens until we find a statement boundary
+    while (!is_at_end()) {
+        if (check(TokenType::Newline) || 
+            check(TokenType::EndOfFile) ||
+            check(TokenType::Kw_Def) || check(TokenType::Kw_Ability) ||
+            check(TokenType::Kw_Fn) || check(TokenType::Kw_Feat) ||
+            check(TokenType::Kw_Let) || check(TokenType::Kw_Limit) ||
+            check(TokenType::Kw_Const) || check(TokenType::Kw_Immo) ||
+            check(TokenType::Kw_If) || check(TokenType::Kw_Verdict) ||
+            check(TokenType::Kw_While) || check(TokenType::Kw_Sustain) ||
+            check(TokenType::Kw_For) || check(TokenType::Kw_Cycle) ||
+            check(TokenType::Kw_Return) || check(TokenType::Kw_Scale)) {
+            return;
+        }
+        advance();
+    }
+}
+
+// ===== Helper Methods =====
+
+const char* Parser::get_token_text(const Token& token) const {
+    return source_.data() + token.offset;
+}
+
+std::string_view Parser::get_token_view(const Token& token) const {
+    return source_.substr(token.offset, token.length);
+}
+
+// ============================================================================
+// Grammar Rules
+// ============================================================================
+
+/**
+ * @brief Parse the entire program
+ */
+Node* Parser::parse_program() {
+    auto* block = builder_.create_block();
+    
+    while (!is_at_end()) {
+        // Skip newlines
+        while (check(TokenType::Newline)) {
+            advance();
+        }
+        
+        if (is_at_end()) break;
+        
+        Stmt* stmt = parse_statement();
+        if (stmt) {
+            builder_.add_statement(block, stmt);
+        }
+        
+        // Skip newlines between statements
+        while (check(TokenType::Newline)) {
+            advance();
+        }
+    }
+    
+    return reinterpret_cast<Node*>(block);
+}
+
+/**
+ * @brief Parse a statement (simple or compound)
+ */
+Stmt* Parser::parse_statement() {
+    // Skip newlines at statement start
+    while (check(TokenType::Newline)) {
+        advance();
+    }
+    
+    if (is_at_end()) return nullptr;
+    
+    at_line_start_ = false;
+    
+    // Compound statements (require indented block)
+    // Handle OLD and NEW keywords
+    if (check(TokenType::Kw_If) || check(TokenType::Kw_Verdict)) {
+        return parse_if_statement();
+    }
+    if (check(TokenType::Kw_While) || check(TokenType::Kw_Sustain)) {
+        return parse_while_statement();
+    }
+    if (check(TokenType::Kw_For) || check(TokenType::Kw_Cycle)) {
+        return parse_for_statement();
+    }
+    if (check(TokenType::Kw_Def) || check(TokenType::Kw_Ability) ||
+        check(TokenType::Kw_Fn) || check(TokenType::Kw_Feat)) {
+        return parse_function_definition();
+    }
+    if (check(TokenType::Kw_Return) || check(TokenType::Kw_Scale)) {
+        return parse_return_statement();
+    }
+    
+    // Simple statements
+    return parse_simple_statement();
+}
+
+/**
+ * @brief Parse simple statement (expression or declaration)
+ */
+Stmt* Parser::parse_simple_statement() {
+    // Let statement - OLD and NEW keywords
+    if (check(TokenType::Kw_Let) || check(TokenType::Kw_Limit) || check(TokenType::Kw_Av)) {
+        return parse_let_statement();
+    }
+    
+    // Const statement - OLD and NEW keywords
+    if (check(TokenType::Kw_Const) || check(TokenType::Kw_Immo)) {
+        return parse_const_statement();
+    }
+    
+    // Expression statement
+    return parse_expression_statement();
+}
+
+/**
+ * @brief Parse expression statement
+ */
+Stmt* Parser::parse_expression_statement() {
+    Expr* expr = parse_expression();
+    
+    // Handle assignment: expr := expr
+    if (check(TokenType::ColonAssign)) {
+        advance();
+        Expr* value = parse_expression();
+        
+        // Convert to let statement - check node kind
+        if (expr->kind == NodeKind::VariableExpr) {
+            auto* var = static_cast<VariableExprNode*>(expr);
+            return builder_.create_let(var->name, value, false);
+        }
+        report_error("Invalid assignment target");
+    }
+    
+    // TODO: Handle other assignment types
+    
+    return reinterpret_cast<Stmt*>(expr);
+}
+
+/**
+ * @brief Parse block (indented body)
+ */
+BlockStmtNode* Parser::parse_block() {
+    // Expect INDENT token
+    if (!check(TokenType::Indent)) {
+        report_error("Expected indented block");
+        return builder_.create_block();
+    }
+    advance();
+    
+    return parse_block_body(veldanava::lexer::TokenType::EndOfFile);
+}
+
+/**
+ * @brief Parse block body (statements until DEDENT)
+ */
+BlockStmtNode* Parser::parse_block_body(veldanava::lexer::TokenType end_token) {
+    auto* block = builder_.create_block();
+    
+    while (!check(TokenType::Dedent) && !is_at_end()) {
+        // Skip newlines
+        while (check(TokenType::Newline)) {
+            advance();
+        }
+        
+        if (check(TokenType::Dedent) || is_at_end()) break;
+        
+        Stmt* stmt = parse_statement();
+        if (stmt) {
+            builder_.add_statement(block, stmt);
+        }
+        
+        // Skip newlines between statements
+        while (check(TokenType::Newline)) {
+            advance();
+        }
+    }
+    
+    // Consume DEDENT
+    if (check(TokenType::Dedent)) {
+        advance();
+    }
+    
+    return block;
+}
+
+/**
+ * @brief Parse let statement (variable declaration)
+ */
+LetStmtNode* Parser::parse_let_statement() {
+    // Consume 'limit' keyword
+    if (!check(TokenType::Kw_Limit)) {
+        report_error("Expected 'limit' keyword");
+        return nullptr;
+    }
+    advance(); // consume 'limit'
+    
+    // Expect identifier
+    if (!check(TokenType::Identifier)) {
+        report_error("Expected variable name after 'limit'");
+        return nullptr;
+    }
+    
+    const char* name = get_token_text(current_token());
+    advance();
+    
+    Expr* initializer = nullptr;
+    bool is_mutable = false;
+    Expr* type_expr = nullptr;
+    
+    // Optional type annotation
+    if (check(TokenType::Colon)) {
+        advance();
+        type_expr = parse_type_expr();
+    }
+    
+    // Optional initializer
+    if (check(TokenType::Assign) || check(TokenType::ColonAssign)) {
+        advance();
+        initializer = parse_expression();
+    }
+    
+    // Semicolon required for braces-style syntax
+    if (check(TokenType::Semicolon)) {
+        advance();
+    } else {
+        report_error("Expected ';' at end of statement");
+    }
+    
+    return builder_.create_let(name, initializer, is_mutable, type_expr);
+}
+
+/**
+ * @brief Parse const statement (constant declaration)
+ */
+LetStmtNode* Parser::parse_const_statement() {
+    // Consume 'immo' keyword
+    if (!check(TokenType::Kw_Immo)) {
+        report_error("Expected 'immo' keyword");
+        return nullptr;
+    }
+    advance(); // consume 'immo'
+    
+    // Expect identifier
+    if (!check(TokenType::Identifier)) {
+        report_error("Expected constant name after 'immo'");
+        return nullptr;
+    }
+    
+    const char* name = get_token_text(current_token());
+    advance();
+    
+    Expr* initializer = nullptr;
+    Expr* type_expr = nullptr;
+    
+    // Optional type annotation
+    if (check(TokenType::Colon)) {
+        advance();
+        type_expr = parse_type_expr();
+    }
+    
+    // Require initializer
+    if (check(TokenType::Assign) || check(TokenType::ColonAssign)) {
+        advance();
+        initializer = parse_expression();
+    } else {
+        report_error("Constant must have an initializer");
+        return nullptr;
+    }
+    
+    // Semicolon required
+    if (check(TokenType::Semicolon)) {
+        advance();
+    } else {
+        report_error("Expected ';' at end of constant declaration");
+    }
+    
+    auto* result = builder_.create_let(name, initializer, false, type_expr);
+    // Mark as constant (could set a flag on LetStmtNode if it had one)
+    return result;
+}
+
+/**
+ * @brief Parse function definition
+ */
+FnStmtNode* Parser::parse_function_definition() {
+    // Consume 'def' or 'fn'
+    advance();
+    
+    // Expect function name
+    if (!check(TokenType::Identifier)) {
+        report_error("Expected function name");
+        return nullptr;
+    }
+    
+    const char* name = get_token_text(current_token());
+    advance();
+    
+    auto* fn = builder_.create_fn(name);
+    
+    // Parse parameters
+    if (check(TokenType::ParenOpen)) {
+        advance();
+        
+        while (!check(TokenType::ParenClose) && !is_at_end()) {
+            if (check(TokenType::Identifier)) {
+                ParamDeclNode* param = builder_.create<ParamDeclNode>();
+                param->kind = NodeKind::ParamDecl;
+                param->name = get_token_text(current_token());
+                param->type_expr = nullptr;
+                param->default_value = nullptr;
+                advance();
+                
+                builder_.add_param(fn, param);
+                
+                if (check(TokenType::Comma)) {
+                    advance();
+                }
+            } else {
+                break;
+            }
+        }
+        
+        if (check(TokenType::ParenClose)) {
+            advance();
+        }
+    }
+    
+    // Parse return type
+    if (check(TokenType::Arrow)) {
+        advance();
+        // TODO: Parse return type expression
+    }
+    
+    // Parse body
+    if (check(TokenType::Indent)) {
+        Stmt* body = parse_block();
+        builder_.set_fn_body(fn, body);
+    } else if (check(TokenType::Assign)) {
+        // Single expression body (arrow function syntax)
+        // fn foo() = expr
+        advance();
+        Expr* expr = parse_expression();
+        auto* block = builder_.create_block();
+        // TODO: Wrap expr in implicit return
+        builder_.add_statement(block, reinterpret_cast<Stmt*>(expr));
+        builder_.set_fn_body(fn, block);
+    }
+    
+    return fn;
+}
+
+/**
+ * @brief Parse parameter
+ */
+ParamDeclNode* Parser::parse_parameter() {
+    if (!check(TokenType::Identifier)) {
+        return nullptr;
+    }
+    
+    auto* param = builder_.create<ParamDeclNode>();
+    param->kind = NodeKind::ParamDecl;
+    param->name = get_token_text(current_token());
+    param->type_expr = nullptr;
+    param->default_value = nullptr;
+    advance();
+    
+    // Parse type annotation
+    if (check(TokenType::Colon)) {
+        advance();
+        param->type_expr = parse_type_expr();
+    } else {
+        // Dynamic type if no annotation
+        param->type_expr = builder_.create_type_expr(TypeExprKind::Dynamic);
+    }
+    
+    // TODO: Parse default value
+    if (check(TokenType::Assign)) {
+        advance();
+        param->default_value = parse_expression();
+    }
+    
+    return param;
+}
+
+/**
+ * @brief Parse if statement
+ */
+IfStmtNode* Parser::parse_if_statement() {
+    // Consume 'if' or 'verdict'
+    advance();
+    
+    // Parse condition
+    Expr* condition = parse_expression();
+    
+    // Parse then branch
+    Stmt* then_branch = nullptr;
+    if (check(TokenType::Indent)) {
+        then_branch = parse_block();
+    } else if (check(TokenType::Newline)) {
+        // Multi-line if on next line
+        advance();
+        at_line_start_ = true;
+        then_branch = parse_block();
+    } else {
+        // Single statement
+        then_branch = parse_simple_statement();
+    }
+    
+    // Parse else branch
+    Stmt* else_branch = nullptr;
+    // Handle OLD (else, elif) and NEW (fail) keywords
+    if (check(TokenType::Kw_Else) || check(TokenType::Kw_Fail)) {
+        advance();
+        if (check(TokenType::Kw_If) || check(TokenType::Kw_Verdict)) {
+            // Else-if chain
+            else_branch = parse_if_statement();
+        } else if (check(TokenType::Indent)) {
+            else_branch = parse_block();
+        } else if (check(TokenType::Newline)) {
+            advance();
+            at_line_start_ = true;
+            else_branch = parse_block();
+        } else {
+            else_branch = parse_simple_statement();
+        }
+    } else if (check(TokenType::Kw_Elif)) {
+        else_branch = parse_if_statement();
+    }
+    
+    return builder_.create_if(condition, then_branch, else_branch);
+}
+
+/**
+ * @brief Parse while statement
+ */
+WhileStmtNode* Parser::parse_while_statement() {
+    // Consume 'while'
+    advance();
+    
+    // Parse condition
+    Expr* condition = parse_expression();
+    
+    // Parse body
+    Stmt* body = nullptr;
+    if (check(TokenType::Indent)) {
+        body = parse_block();
+    } else if (check(TokenType::Newline)) {
+        advance();
+        at_line_start_ = true;
+        body = parse_block();
+    } else {
+        body = parse_simple_statement();
+    }
+    
+    return builder_.create_while(condition, body);
+}
+
+/**
+ * @brief Parse for statement
+ */
+ForStmtNode* Parser::parse_for_statement() {
+    // Consume 'for'
+    advance();
+    
+    // Parse iterator variable
+    if (!check(TokenType::Identifier)) {
+        report_error("Expected iterator variable name");
+        return nullptr;
+    }
+    
+    const char* iterator_name = get_token_text(current_token());
+    advance();
+    
+    // Expect 'in' keyword
+    if (!check(TokenType::Identifier) || get_token_view(current_token()) != "in") {
+        report_error("Expected 'in' keyword");
+        return nullptr;
+    }
+    advance();
+    
+    // Parse iterable expression
+    Expr* iterable = parse_expression();
+    
+    // Parse body
+    Stmt* body = nullptr;
+    if (check(TokenType::Indent)) {
+        body = parse_block();
+    } else if (check(TokenType::Newline)) {
+        advance();
+        at_line_start_ = true;
+        body = parse_block();
+    } else {
+        body = parse_simple_statement();
+    }
+    
+    return builder_.create_for(iterator_name, iterable, body);
+}
+
+/**
+ * @brief Parse return statement
+ */
+ReturnStmtNode* Parser::parse_return_statement() {
+    // Consume 'return'
+    advance();
+    
+    // Parse return value (optional)
+    Expr* value = nullptr;
+    if (!check(TokenType::Newline) && !is_at_end()) {
+        value = parse_expression();
+    }
+    
+    return builder_.create_return(value);
+}
+
+// ============================================================================
+// Expression Parsing (Precedence Climbing)
+// ============================================================================
+
+/**
+ * @brief Parse expression (lowest precedence)
+ */
+Expr* Parser::parse_expression() {
+    return parse_assignment();
+}
+
+/**
+ * @brief Parse assignment expression
+ */
+Expr* Parser::parse_assignment() {
+    Expr* left = parse_logical_or();
+    
+    if (check(TokenType::Assign) || check(TokenType::ColonAssign)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_assignment();
+        return builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse logical OR (||)
+ */
+Expr* Parser::parse_logical_or() {
+    Expr* left = parse_logical_and();
+    
+    while (check(TokenType::Or)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_logical_and();
+        left = builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse logical AND (&&)
+ */
+Expr* Parser::parse_logical_and() {
+    Expr* left = parse_equality();
+    
+    while (check(TokenType::And)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_equality();
+        left = builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse equality (==, !=)
+ */
+Expr* Parser::parse_equality() {
+    Expr* left = parse_comparison();
+    
+    while (check(TokenType::Eq) || check(TokenType::Neq)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_comparison();
+        left = builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse comparison (<, >, <=, >=)
+ */
+Expr* Parser::parse_comparison() {
+    Expr* left = parse_term();
+    
+    while (check(TokenType::Lt) || check(TokenType::Gt) ||
+           check(TokenType::Lte) || check(TokenType::Gte)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_term();
+        left = builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse term (+, -)
+ */
+Expr* Parser::parse_term() {
+    Expr* left = parse_factor();
+    
+    while (check(TokenType::Plus) || check(TokenType::Minus)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_factor();
+        left = builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse factor (*, /, %)
+ */
+Expr* Parser::parse_factor() {
+    Expr* left = parse_unary();
+    
+    while (check(TokenType::Star) || check(TokenType::Slash) || 
+           check(TokenType::Percent)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* right = parse_unary();
+        left = builder_.create_binary(left, op, right);
+    }
+    
+    return left;
+}
+
+/**
+ * @brief Parse unary operators (-, !, ~)
+ */
+Expr* Parser::parse_unary() {
+    if (check(TokenType::Minus) || check(TokenType::Exclaim) || 
+        check(TokenType::Tilde)) {
+        uint16_t op = static_cast<uint16_t>(current_token().type);
+        advance();
+        Expr* operand = parse_unary();
+        return builder_.create_unary(op, operand);
+    }
+    
+    return parse_postfix();
+}
+
+/**
+ * @brief Parse postfix expressions (function calls, member access, etc.)
+ */
+Expr* Parser::parse_postfix() {
+    Expr* expr = parse_primary();
+    
+    while (true) {
+        if (check(TokenType::ParenOpen)) {
+            // Function call
+            expr = parse_call(expr);
+        } else if (check(TokenType::Dot)) {
+            // Member access
+            advance();
+            if (check(TokenType::Identifier)) {
+                const char* member = get_token_text(current_token());
+                advance();
+                // TODO: Create member expression
+            }
+        } else if (check(TokenType::BracketOpen)) {
+            // Index expression
+            advance();
+            Expr* index = parse_expression();
+            if (check(TokenType::BracketClose)) {
+                advance();
+            }
+            // TODO: Create index expression
+            (void)index; // Suppress unused warning
+        } else {
+            break;
+        }
+    }
+    
+    return expr;
+}
+
+/**
+ * @brief Parse primary (literals, identifiers, parenthesized expressions)
+ */
+Expr* Parser::parse_primary() {
+    // Literals
+    if (check(TokenType::Integer) || check(TokenType::Float) ||
+        check(TokenType::String) || check(TokenType::Char) ||
+        check(TokenType::Boolean) || check(TokenType::Kw_True) ||
+        check(TokenType::Kw_False) || check(TokenType::Kw_None)) {
+        return parse_literal();
+    }
+    
+    // Parenthesized expression
+    if (check(TokenType::ParenOpen)) {
+        advance();
+        Expr* expr = parse_expression();
+        if (check(TokenType::ParenClose)) {
+            advance();
+        }
+        return expr;
+    }
+    
+    // Identifier (variable reference or function call)
+    if (check(TokenType::Identifier)) {
+        const char* name = get_token_text(current_token());
+        advance();
+        return builder_.create_variable(name);
+    }
+
+    // manifest statement (new expression: manifest Type(args))
+    if (check(TokenType::Kw_Manifest)) {
+        advance(); // consume "manifest"
+        if (!check(TokenType::Identifier)) {
+            report_error("Expected type name after manifest");
+            return builder_.create_none();
+        }
+        const char* type_name = get_token_text(current_token());
+        advance();
+        // Check for constructor arguments
+        if (check(TokenType::ParenOpen)) {
+            Expr* ctor_call = parse_call(builder_.create_variable(type_name));
+            return ctor_call;
+        } else {
+            // manifest Type - gọi constructor không đối số
+            auto* ctor_call = builder_.create_call(builder_.create_variable(type_name));
+            return ctor_call;
+        }
+    }
+    
+    // Print function
+    if (check(TokenType::Kw_Print)) {
+        advance();
+        if (check(TokenType::ParenOpen)) {
+            advance();
+            Expr* arg = parse_expression();
+            if (check(TokenType::ParenClose)) {
+                advance();
+            }
+            auto* call = builder_.create_call(builder_.create_variable("print"));
+            builder_.add_argument(call, arg);
+            return call;
+        }
+    }
+    
+    report_error("Unexpected token in expression");
+    return builder_.create_none();
+}
+
+/**
+ * @brief Parse literal expression
+ */
+LiteralExprNode* Parser::parse_literal() {
+    const Token& token = current_token();
+    
+    switch (token.type) {
+        case TokenType::Integer: {
+            advance();
+            std::string_view text = get_token_view(token);
+            int64_t value = 0;
+            // Parse integer
+            for (char c : text) {
+                if (c >= '0' && c <= '9') {
+                    value = value * 10 + (c - '0');
+                }
+            }
+            return builder_.create_literal(value);
+        }
+        
+        case TokenType::Float: {
+            advance();
+            std::string_view text = get_token_view(token);
+            double value = std::stod(std::string(text));
+            return builder_.create_literal(value);
+        }
+        
+        case TokenType::String: {
+            advance();
+            std::string_view text = get_token_view(token);
+            std::cerr << "[PARSER] String token: offset=" << token.offset << " length=" << token.length << " text=\"" << text << "\"" << std::endl;
+            // String already excludes quotes in lexer - token view is content only
+            // Copy string to arena
+            return builder_.create_literal(static_cast<const char*>(text.data()));
+        }
+        
+        case TokenType::Char: {
+            advance();
+            std::string_view text = get_token_view(token);
+            char value = text.length() > 0 ? text[0] : '\0';
+            return builder_.create_literal(value);
+        }
+        
+        case TokenType::Boolean:
+        case TokenType::Kw_True:
+        case TokenType::Kw_False: {
+            advance();
+            bool value = (token.type == TokenType::Boolean) || 
+                         (token.type == TokenType::Kw_True);
+            return builder_.create_literal(value);
+        }
+        
+        case TokenType::Kw_None: {
+            advance();
+            return builder_.create_none();
+        }
+        
+        default:
+            report_error("Expected literal");
+            advance();
+            return builder_.create_none();
+    }
+}
+
+/**
+ * @brief Parse function call
+ */
+CallExprNode* Parser::parse_call(Expr* callee) {
+    // Consume opening paren
+    advance();
+    
+    auto* call = builder_.create_call(callee);
+    
+    // Parse arguments
+    while (!check(TokenType::ParenClose) && !is_at_end()) {
+        Expr* arg = parse_expression();
+        builder_.add_argument(call, arg);
+        
+        if (check(TokenType::Comma)) {
+            advance();
+        }
+    }
+    
+    // Consume closing paren
+    if (check(TokenType::ParenClose)) {
+        advance();
+    }
+    
+    return call;
+}
+
+/**
+ * @brief Parse type expression (int, str, bool, float, vec<T>, Registry<K,V>)
+ */
+Expr* Parser::parse_type_expr() {
+    if (is_at_end()) {
+        return builder_.create_none();
+    }
+    
+    // Check for generic type: vec<T> or Registry<K,V>
+    if (check(TokenType::Identifier)) {
+        const char* type_name = get_token_text(current_token());
+        advance();
+        
+        // Check for generic parameters: vec<int>, Registry<str,int>
+        if (check(TokenType::Lt)) {
+            advance(); // consume <
+            
+            // Parse first type parameter
+            Expr* first_param = parse_type_expr();
+            (void)first_param; // TODO: store in generic type node
+            
+            // Check for second parameter (Registry<K,V>)
+            Expr* second_param = nullptr;
+            if (check(TokenType::Comma)) {
+                advance();
+                second_param = parse_type_expr();
+                (void)second_param;
+            }
+            
+            if (check(TokenType::Gt)) {
+                advance(); // consume >
+            }
+            
+            // For now, create a variable representing the type
+            return builder_.create_variable(type_name);
+        }
+        
+        // Simple type: int, str, bool, float, etc.
+        return builder_.create_variable(type_name);
+    }
+    
+    return builder_.create_none();
+}
+
+// ===== Main Parse Entry Point =====
+
+/**
+ * @brief Parse the token stream
+ */
+ParseResult Parser::parse() {
+    Node* root = parse_program();
+    
+    if (error_count_ > 0) {
+        std::ostringstream oss;
+        oss << error_count_ << " parse error(s)";
+        return ParseResult::fail(oss.str());
+    }
+    
+    return ParseResult::ok(root);
+}
+
+} // namespace parser
+} // namespace veldanava
+

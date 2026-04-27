@@ -1,0 +1,7 @@
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/veldanc.dir
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/edit_cache.dir
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/rebuild_cache.dir
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/list_install_components.dir
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/install.dir
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/install/local.dir
+/home/dr-bright-rathalus/Veldanava/build/CMakeFiles/install/strip.dir

@@ -1,0 +1,7 @@
+# Test basic arithmetic - no strings
+feat main() {
+    av x = 42;
+    av y = 100;
+    av z = x + y;
+    scale z;
+}

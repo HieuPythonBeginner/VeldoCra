@@ -1,0 +1,92 @@
+// Universal Python FFI Demo - Shows integration with ANY Python library
+// This demonstrates the full power of VeldoCra's Python FFI system
+
+extern "python" {
+    ;// Colorama for terminal colors
+    feat colorama_init() -> void;
+    feat Fore_RED() -> str;
+    feat Fore_GREEN() -> str;
+    feat Fore_RESET() -> str;
+    feat Style_BRIGHT() -> str;
+
+    ;// OS operations
+    feat os_getcwd() -> str;
+    feat os_listdir(path: str) -> str; ;// JSON array of files
+
+    ;// JSON handling
+    feat json_loads(data: str) -> str;
+    feat json_dumps(data: str) -> str;
+
+    ;// Math operations (numpy if available, fallback to math)
+    feat math_sqrt(x: str) -> str;  ;// String args/results for universality
+    feat math_sin(x: str) -> str;
+    feat math_pi() -> str;
+
+    ;// Random numbers
+    feat random_random() -> str;
+    feat random_randint(min: str, max: str) -> str;
+
+    ;// HTTP requests (requests library)
+    feat requests_get(url: str) -> str;  ;// JSON response
+
+    ;// File operations
+    feat pathlib_Path_exists(path: str) -> str;  ;// "True" or "False"
+    feat pathlib_Path_read_text(path: str) -> str;
+}
+
+feat main() -> void {
+    scribe(Style_BRIGHT() + Fore_RED() + "=== VeldoCra Universal Python FFI Demo ===\n" + Fore_RESET());
+
+    ;// 1. Basic colorama
+    colorama_init();
+    scribe(Fore_GREEN() + "✓ Python FFI initialized successfully!\n" + Fore_RESET());
+
+    ;// 2. OS operations
+    av cwd = os_getcwd();
+    scribe("Current directory: " + cwd + "\n");
+
+    av files_json = os_listdir(".");
+    scribe("Files in current dir: " + files_json + "\n");
+
+    ;// 3. Math operations
+    av sqrt_result = math_sqrt("16");
+    av pi_value = math_pi();
+    scribe("sqrt(16) = " + sqrt_result + "\n");
+    scribe("π = " + pi_value + "\n");
+
+    ;// 4. Random numbers
+    av random_num = random_random();
+    av randint_result = random_randint("1", "100");
+    scribe("Random float: " + random_num + "\n");
+    scribe("Random int (1-100): " + randint_result + "\n");
+
+    ;// 5. JSON operations
+    av test_data = json_dumps("{\"name\": \"VeldoCra\", \"version\": \"0.1\", \"ffi\": true}");
+    av parsed = json_loads(test_data);
+    scribe("JSON test: " + parsed + "\n");
+
+    ;// 6. File operations
+    av readme_exists = pathlib_Path_exists("README.md");
+    verdict readme_exists == "True" {
+        scribe("README.md exists!\n");
+        av readme_content = pathlib_Path_read_text("README.md");
+        verdict len(readme_content) > 100 {
+            av preview = readme_content[0:100] + "...";
+            scribe("README preview: " + preview + "\n");
+        }
+    } fail {
+        scribe("README.md not found\n");
+    }
+
+    ;// 7. HTTP requests (if requests library available)
+    scribe("\nTesting HTTP requests...\n");
+    av http_result = requests_get("https:;//httpbin.org/get");
+    verdict len(http_result) > 0 {
+        scribe("HTTP GET successful! Response length: " + len(http_result) + "\n");
+    } fail {
+        scribe("HTTP requests not available (requests library not installed)\n");
+    }
+
+    scribe(Style_BRIGHT() + Fore_GREEN() + "\n=== Universal Python FFI Demo Complete! ===\n" + Fore_RESET());
+    scribe("VeldoCra can now call ANY Python library! 🎉\n");
+}

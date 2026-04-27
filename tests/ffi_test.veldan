@@ -1,0 +1,42 @@
+// FFI Test Program - Demonstrating C/C++ library integration
+// This program shows how VeldoCra can call functions from external C libraries
+
+// Import external C functions
+extern "C" {
+    feat add_numbers(a: int, b: int) -> int;
+    feat multiply_numbers(a: int, b: int) -> int;
+    feat greet_person(name: str) -> str;
+    feat free_string(str: str) -> void;
+    feat factorial(n: int) -> long;
+}
+
+// Main function demonstrating FFI calls
+feat main() -> void {
+    scribe("=== VeldoCra FFI Test Program ===\n");
+
+    ;// Test basic math functions
+    scribe("Testing basic math functions:\n");
+    av sum = add_numbers(10, 20);
+    scribe("add_numbers(10, 20) = " + sum + "\n");
+
+    av product = multiply_numbers(5, 8);
+    scribe("multiply_numbers(5, 8) = " + product + "\n");
+
+    ;// Test factorial function
+    scribe("\nTesting factorial function:\n");
+    av fact5 = factorial(5);
+    scribe("factorial(5) = " + fact5 + "\n");
+
+    av fact10 = factorial(10);
+    scribe("factorial(10) = " + fact10 + "\n");
+
+    ;// Test string functions
+    scribe("\nTesting string functions:\n");
+    av greeting = greet_person("VeldoCra Developer");
+    scribe("Greeting: " + greeting + "\n");
+
+    ;// Clean up allocated string (in real FFI, this would be automatic)
+    free_string(greeting);
+
+    scribe("\n=== FFI Test Complete ===\n");
+}

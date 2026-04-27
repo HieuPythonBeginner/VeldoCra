@@ -1,0 +1,24 @@
+{
+  "iconThemeId": "veldora-dragon-icons",
+  "iconDefinitions": {
+    "_vel_file": {
+      "iconPath": "./VeldAni.png"
+    }
+  },
+  "languageIds": {
+    "veldora": "veldora"
+  },
+  "file": [
+    {
+      "file": "\\.veldan$",
+      "icon": "_vel_file"
+    }
+  ],
+  "folder": [],
+  "folderNames": {},
+  "fileNames": {},
+  "rootFolder": {
+    "icon": "_vel_file"
+  },
+  "description": "Custom icon theme for Veldanava .veldan files featuring the Veldora Dragon"
+}

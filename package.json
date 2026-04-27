@@ -1,0 +1,44 @@
+{
+  "name": "veldora-language-support",
+  "displayName": "Veldanava Language Support",
+  "description": "Complete language support for Veldanava programming language - syntax highlighting, file icons, and language features",
+  "version": "1.0.0",
+  "publisher": "Veldanava",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Themes"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "veldora",
+      "aliases": ["Veldanava", "veldan"],
+      "extensions": [".veldan"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "veldora",
+      "scopeName": "source.veldora",
+      "path": "./syntaxes/veldora.tmLanguage.json"
+    }],
+    "themes": [{
+      "label": "Veldanava Dark+",
+      "uiTheme": "vs-dark",
+      "path": "./themes/Veldanava-color-theme.json"
+    }]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kilo-Org/veldana"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.50.0",
+    "vsce": "^2.0.0"
+  }
+}
